@@ -3,95 +3,6 @@ import { motion } from 'framer-motion';
 import { Wallet, LogOut, User } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
-const styles = {
-  loading: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '8px'
-  },
-  spinner: {
-    width: '24px',
-    height: '24px',
-    border: '2px solid rgba(240, 185, 11, 0.3)',
-    borderTop: '2px solid #f0b90b',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite'
-  },
-  connectedContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    background: 'rgba(0, 0, 0, 0.3)',
-    backdropFilter: 'blur(20px)',
-    borderRadius: '16px',
-    border: '1px solid rgba(240, 185, 11, 0.3)',
-    padding: '12px',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
-  },
-  userInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px'
-  },
-  avatar: {
-    width: '32px',
-    height: '32px',
-    background: 'linear-gradient(135deg, #f0b90b, #ffd700)',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 4px 15px rgba(240, 185, 11, 0.3)'
-  },
-  userDetails: {
-    textAlign: 'left' as const
-  },
-  address: {
-    color: '#f0b90b',
-    fontWeight: '600',
-    fontSize: '14px',
-    textShadow: '0 0 10px rgba(240, 185, 11, 0.5)'
-  },
-  balance: {
-    color: '#9ca3af',
-    fontSize: '12px'
-  },
-  disconnectButton: {
-    padding: '8px',
-    color: '#f87171',
-    backgroundColor: 'transparent',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
-  },
-  connectContainer: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '8px'
-  },
-  connectButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    background: 'linear-gradient(135deg, #f0b90b, #ffd700)',
-    color: '#000000',
-    fontWeight: '600',
-    padding: '12px 24px',
-    borderRadius: '12px',
-    border: '1px solid rgba(240, 185, 11, 0.3)',
-    boxShadow: '0 4px 15px rgba(240, 185, 11, 0.3)',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
-  },
-  errorMessage: {
-    color: '#f87171',
-    fontSize: '14px',
-    textAlign: 'center' as const
-  }
-};
-
 const WalletConnect: React.FC = () => {
   const { isConnected, wallet, isLoading, error, connectWallet, disconnectWallet } = useAuth();
 
@@ -108,9 +19,9 @@ const WalletConnect: React.FC = () => {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        style={styles.loading}
+        className="flex items-center justify-center p-2"
       >
-        <div style={styles.spinner}></div>
+        <div className="w-6 h-6 border-2 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin"></div>
       </motion.div>
     );
   }
@@ -120,17 +31,17 @@ const WalletConnect: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        style={styles.connectedContainer}
+        className="flex items-center gap-3 bg-black/30 backdrop-blur-xl rounded-2xl border border-yellow-400/30 p-3 shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
       >
-        <div style={styles.userInfo}>
-          <div style={styles.avatar}>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-300 rounded-full flex items-center justify-center shadow-[0_4px_15px_rgba(240,185,11,0.3)]">
             <User size={16} color="#000000" />
           </div>
-          <div style={styles.userDetails}>
-            <div style={styles.address}>
+          <div className="text-left">
+            <div className="text-yellow-400 font-semibold text-sm [text-shadow:0_0_10px_rgba(240,185,11,0.5)]">
               {formatAddress(wallet.address)}
             </div>
-            <div style={styles.balance}>
+            <div className="text-gray-400 text-xs">
               {formatBalance(wallet.balance)} ETH
             </div>
           </div>
@@ -139,7 +50,7 @@ const WalletConnect: React.FC = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={disconnectWallet}
-          style={styles.disconnectButton}
+          className="p-2 text-red-400 bg-transparent border-none rounded-lg cursor-pointer transition-all duration-200 hover:bg-red-400/10"
           title="Disconnect Wallet"
         >
           <LogOut size={16} />
@@ -149,24 +60,30 @@ const WalletConnect: React.FC = () => {
   }
 
   return (
-    <div style={styles.connectContainer}>
-      <motion.button
-        whileHover={{ 
-          scale: 1.02, 
-          boxShadow: '0 0 30px rgba(6, 182, 212, 0.3)' 
-        }}
-        whileTap={{ scale: 0.98 }}
-        onClick={connectWallet}
-        style={styles.connectButton}
+    <div className="flex flex-col gap-2">
+      <motion.div
+        className="relative group"
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
       >
-        <Wallet size={20} />
-        <span>Connect MetaMask</span>
-      </motion.button>
+        {/* Subtle gradient border */}
+        <div className="absolute -inset-px bg-gradient-to-r from-yellow-400/20 via-orange-500/20 to-yellow-400/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        
+        {/* Button */}
+        <motion.button
+          onClick={connectWallet}
+          className="relative flex items-center gap-2 bg-black/70 backdrop-blur-md text-white font-rajdhani-medium px-5 py-2.5 rounded-xl border border-gray-700/30 transition-all duration-300 group-hover:border-yellow-400/30 group-hover:bg-black/80 cursor-pointer"
+        >
+          <Wallet size={18} className="text-yellow-400" />
+          <span>Connect MetaMask</span>
+        </motion.button>
+      </motion.div>
+      
       {error && (
         <motion.p
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          style={styles.errorMessage}
+          className="text-red-400 text-sm text-center"
         >
           {error}
         </motion.p>

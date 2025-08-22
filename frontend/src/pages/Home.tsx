@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header';
 import Hero from '../components/Hero';
 import Matches from '../components/Matches';
 import LiveStreams from '../components/LiveStreams';
+import SideNav from '../components/SideNav';
 
 const Home: React.FC = () => {
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black relative">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black relative flex">
       {/* Global Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {/* Large central gradient orb */}
@@ -20,11 +23,21 @@ const Home: React.FC = () => {
         <div className="absolute bottom-1/4 left-1/4 w-[350px] h-[350px] bg-gradient-to-br from-orange-500/8 via-amber-500/5 to-transparent rounded-full blur-3xl"></div>
       </div>
 
-      <div className="relative z-10">
-        <Header />
-        <Hero />
-        <Matches />
-        <LiveStreams />
+      {/* Sidebar */}
+      <SideNav isExpanded={sidebarExpanded} setIsExpanded={setSidebarExpanded} />
+
+      {/* Main Content */}
+      <div 
+        className={`flex-1 transition-all duration-150 ease-in-out ${
+          sidebarExpanded ? 'ml-64' : 'ml-16'
+        }`}
+      >
+        <div className="relative z-10">
+          <Header />
+          <Hero />
+          <Matches />
+          <LiveStreams />
+          </div>
       </div>
     </div>
   );

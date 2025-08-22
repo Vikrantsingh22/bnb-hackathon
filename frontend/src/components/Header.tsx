@@ -8,18 +8,18 @@ const Header: React.FC = () => {
     <motion.header
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="border-b border-yellow-400/20 bg-black/30 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.3)] sticky top-0 z-50"
+      className=" bg-black/30 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.3)] sticky top-0 z-50"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-300 rounded-xl flex items-center justify-center shadow-[0_4px_15px_rgba(240,185,11,0.3)]">
-            <GamepadIcon size={24} color="#000000" />
+          <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center shadow-[0_4px_15px_rgba(240,185,11,0.3)]">
+            <span className="text-black font-bold">BC</span>
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-300 bg-clip-text text-transparent [text-shadow:0_0_20px_rgba(240,185,11,0.5)]">
-              BNBCAT Gaming
+            <h1 className="text-xl sm:text-2xl font-rajdhani-bold bg-gradient-to-r from-yellow-400 to-yellow-300 bg-clip-text text-transparent [text-shadow:0_0_20px_rgba(240,185,11,0.5)]">
+              BNBCAT
             </h1>
-            <p className="text-gray-400 text-xs sm:text-sm">Powered by BNB Chain</p>
+            <p className="text-gray-400 text-xs sm:text-sm font-rajdhani-regular">Powered by BNB Chain</p>
           </div>
         </div>
         <WalletConnect />
