@@ -21,35 +21,30 @@
 		"type": "error"
 	},
 	{
-		"inputs": [],
-		"name": "DirectBnbNotAllowed",
-		"type": "error"
-	},
-	{
-		"inputs": [],
-		"name": "ECDSAInvalidSignature",
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "betId",
+				"type": "uint256"
+			}
+		],
+		"name": "BetAlreadySettled",
 		"type": "error"
 	},
 	{
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "length",
+				"name": "betId",
 				"type": "uint256"
 			}
 		],
-		"name": "ECDSAInvalidSignatureLength",
+		"name": "BetNotFound",
 		"type": "error"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "s",
-				"type": "bytes32"
-			}
-		],
-		"name": "ECDSAInvalidSignatureS",
+		"inputs": [],
+		"name": "DirectBnbNotAllowed",
 		"type": "error"
 	},
 	{
@@ -81,6 +76,11 @@
 	{
 		"inputs": [],
 		"name": "InvalidInput",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidOdds",
 		"type": "error"
 	},
 	{
@@ -366,7 +366,13 @@
 			{
 				"indexed": false,
 				"internalType": "uint256",
-				"name": "nonce",
+				"name": "odds",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "betId",
 				"type": "uint256"
 			}
 		],
@@ -416,7 +422,13 @@
 			{
 				"indexed": false,
 				"internalType": "uint256[]",
-				"name": "amounts",
+				"name": "betIds",
+				"type": "uint256[]"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256[]",
+				"name": "payoutAmounts",
 				"type": "uint256[]"
 			},
 			{
@@ -427,9 +439,9 @@
 			},
 			{
 				"indexed": false,
-				"internalType": "address[]",
-				"name": "winners",
-				"type": "address[]"
+				"internalType": "uint256",
+				"name": "playerId",
+				"type": "uint256"
 			},
 			{
 				"indexed": false,
@@ -588,6 +600,50 @@
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "betDetails",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "odds",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "tokenAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "bool",
+				"name": "isNative",
+				"type": "bool"
+			},
+			{
+				"internalType": "bool",
+				"name": "settled",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "bnbBalance",
 		"outputs": [
@@ -618,6 +674,60 @@
 		"name": "burnAccumulatedFees",
 		"outputs": [],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "challengeBets",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "odds",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "tokenAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "bool",
+				"name": "isNative",
+				"type": "bool"
+			},
+			{
+				"internalType": "bool",
+				"name": "settled",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -697,6 +807,81 @@
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "challengeId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "playerId",
+				"type": "uint256"
+			}
+		],
+		"name": "getBetCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "count",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "betId",
+				"type": "uint256"
+			}
+		],
+		"name": "getBetDetails",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "user",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "odds",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "tokenAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "bool",
+						"name": "isNative",
+						"type": "bool"
+					},
+					{
+						"internalType": "bool",
+						"name": "settled",
+						"type": "bool"
+					}
+				],
+				"internalType": "struct MultiTokenEscrow.Bet",
+				"name": "bet",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "getBurnFeeInfo",
 		"outputs": [
@@ -714,6 +899,62 @@
 				"internalType": "uint256",
 				"name": "totalBurned",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "challengeId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "playerId",
+				"type": "uint256"
+			}
+		],
+		"name": "getChallengeBets",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "user",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "odds",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "tokenAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "bool",
+						"name": "isNative",
+						"type": "bool"
+					},
+					{
+						"internalType": "bool",
+						"name": "settled",
+						"type": "bool"
+					}
+				],
+				"internalType": "struct MultiTokenEscrow.Bet[]",
+				"name": "bets",
+				"type": "tuple[]"
 			}
 		],
 		"stateMutability": "view",
@@ -784,6 +1025,19 @@
 	},
 	{
 		"inputs": [],
+		"name": "nextBetId",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "owner",
 		"outputs": [
 			{
@@ -834,60 +1088,13 @@
 			}
 		],
 		"name": "participate",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			},
+		"outputs": [
 			{
 				"internalType": "uint256",
-				"name": "amount",
+				"name": "betId",
 				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "challengeId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "playerId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "enum MultiTokenEscrow.ParticipationType",
-				"name": "participationType",
-				"type": "uint8"
-			},
-			{
-				"internalType": "bool",
-				"name": "isNative",
-				"type": "bool"
-			},
-			{
-				"internalType": "address",
-				"name": "tokenAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "nonce",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bytes",
-				"name": "signature",
-				"type": "bytes"
 			}
 		],
-		"name": "participateWithSignature",
-		"outputs": [],
 		"stateMutability": "payable",
 		"type": "function"
 	},
@@ -914,27 +1121,12 @@
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "isNative",
-				"type": "bool"
-			},
-			{
-				"internalType": "address payable",
-				"name": "adminAccount",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "tokenAddress",
-				"type": "address"
+				"internalType": "uint256[]",
+				"name": "betIds",
+				"type": "uint256[]"
 			}
 		],
-		"name": "send",
+		"name": "settleBetsByIds",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -942,32 +1134,17 @@
 	{
 		"inputs": [
 			{
-				"internalType": "uint256[]",
-				"name": "amounts",
-				"type": "uint256[]"
-			},
-			{
 				"internalType": "uint256",
 				"name": "challengeId",
 				"type": "uint256"
 			},
 			{
-				"internalType": "bool",
-				"name": "isNative",
-				"type": "bool"
-			},
-			{
-				"internalType": "address payable[]",
-				"name": "winners",
-				"type": "address[]"
-			},
-			{
-				"internalType": "address",
-				"name": "tokenAddress",
-				"type": "address"
+				"internalType": "uint256",
+				"name": "playerId",
+				"type": "uint256"
 			}
 		],
-		"name": "settleChallenge",
+		"name": "settleChallengePlayer",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -1069,19 +1246,6 @@
 			}
 		],
 		"name": "userNonces",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "userOdds",
 		"outputs": [
 			{
 				"internalType": "uint256",
