@@ -8,8 +8,8 @@ const Hero: React.FC = () => {
         <div className="w-full max-w-6xl mx-auto text-center">
           {/* Announcement Banner */}
           <div className="mb-2">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-full px-4 py-1 text-sm text-yellow-300 backdrop-blur-sm">
-              <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400/25 to-yellow-300/20 border border-yellow-400/40 rounded-full px-4 py-1 text-sm text-yellow-200 backdrop-blur-sm">
+              <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></span>
               New betting features are live! 
               <ArrowRight size={14} />
             </div>
@@ -17,12 +17,12 @@ const Hero: React.FC = () => {
 
           {/* Main Title */}
           <div className="mb-8">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-fredoka-bold mb-4">
+              <span className="bg-gradient-to-r from-white via-gray-100 to-gray-200 bg-clip-text text-transparent">
                 Accelerate Your
               </span>
               <br />
-              <span className="bg-gradient-to-r from-yellow-400 via-orange-400 to-amber-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-200 bg-clip-text text-transparent">
                 Betting With AI
               </span>
             </h1>

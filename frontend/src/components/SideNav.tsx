@@ -91,7 +91,7 @@ const SideNav: React.FC<SideNavProps> = ({ isExpanded, setIsExpanded }) => {
       <div className={`border-b border-gray-700/50 ${isExpanded ? 'p-4' : 'p-2'}`}>
         {isExpanded ? (
           <div className="flex items-center justify-between">
-            <span className="font-rajdhani-bold text-white text-lg">Menu</span>
+                                <span className="font-fredoka-bold text-white text-lg">Menu</span>
             <motion.button
               onClick={() => setIsExpanded(!isExpanded)}
               className="p-2 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 text-gray-400 hover:text-white transition-colors"

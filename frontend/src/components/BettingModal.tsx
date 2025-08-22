@@ -83,7 +83,7 @@ const BettingModal: React.FC<BettingModalProps> = ({ isOpen, onClose, match, sel
             <div className="bg-gray-900/95 backdrop-blur-xl border border-yellow-400/30 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.5)] w-full max-w-md mx-auto">
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-700/30">
-                <h3 className="text-xl font-rajdhani-bold text-white">Place Bet</h3>
+                <h3 className="text-xl font-fredoka-bold text-white">Place Bet</h3>
                 <motion.button
                   onClick={onClose}
                   className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-800/50"
@@ -98,7 +98,7 @@ const BettingModal: React.FC<BettingModalProps> = ({ isOpen, onClose, match, sel
               <div className="p-6 space-y-6">
                 {/* Bet Selection */}
                 <div className="text-center">
-                  <div className="text-white font-rajdhani-semibold text-lg mb-1">{selectedTeamData.name}</div>
+                  <div className="text-white font-fredoka-semibold text-lg mb-1">{selectedTeamData.name}</div>
                   <div className="text-gray-400 text-sm mb-3">{match.event}</div>
                   <div className="inline-flex items-center gap-2 bg-yellow-400/20 border border-yellow-400/30 rounded-lg px-4 py-2">
                     <span className="text-yellow-400 font-rajdhani-bold text-lg">

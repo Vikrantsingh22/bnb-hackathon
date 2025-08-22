@@ -154,7 +154,7 @@ const LiveStreams: React.FC = () => {
     >
       <div className="mx-10">
         <div className="flex items-center justify-between mb-10">
-          <h3 className="text-3xl sm:text-4xl font-rajdhani-bold text-white">Live FIFA Streams</h3>
+                          <h3 className="text-3xl sm:text-4xl font-fredoka-bold text-white">Live FIFA Streams</h3>
           {error && (
             <span className="text-red-400 text-sm font-rajdhani-medium">{error}</span>
           )}

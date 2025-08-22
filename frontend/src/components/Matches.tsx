@@ -285,7 +285,7 @@ const Matches: React.FC = () => {
       >
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-rajdhani-semibold">
+            <div className="flex items-center gap-1 bg-gray-600 text-white px-2 py-1 rounded-full text-xs font-rajdhani-semibold">
               <Clock size={12} />
               <span>{match.eta}</span>
             </div>
@@ -387,7 +387,7 @@ const Matches: React.FC = () => {
     >
       <div className="mx-10">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-1">
-          <h3 className="text-3xl sm:text-4xl font-bold text-white">Live Matches</h3>
+          <h3 className="text-3xl sm:text-4xl font-fredoka-bold text-white">Live Matches</h3>
           <div className="flex gap-2 bg-black/30 backdrop-blur-md rounded-2xl p-1.5 border border-yellow-400/20 shadow-[0_8px_32px_rgba(0,0,0,0.3)] self-start sm:self-auto">
             <button
               onClick={() => setActiveTab('live')}
