@@ -14,6 +14,13 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors()); // Allow CORS for all origins
 app.use(express.json());
+app.use(
+  cors({
+    origin: "*", // Allow all origins (use specific domain in production)
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 // Middleware to log all incoming requests
 app.use((req: Request, res: Response, next: NextFunction) => {
