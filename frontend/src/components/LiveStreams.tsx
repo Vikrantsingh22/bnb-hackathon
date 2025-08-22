@@ -43,7 +43,7 @@ const LiveStreams: React.FC = () => {
     },
     {
       id: '2', 
-      url: 'https://youtu.be/dQw4w9WgXcQ',
+      url: 'https://youtu.be/34_X1K_LsyU?si=_V_ciL0VEG8bNNzN',
       title: 'Champions League Match',
       platform: 'youtube',
       viewers: '1.8K',
@@ -51,7 +51,7 @@ const LiveStreams: React.FC = () => {
     },
     {
       id: '3',
-      url: 'https://youtu.be/3JZ_D3ELwOQ',
+      url: 'https://youtu.be/lffsANNTIgc?si=R1u0eC8LeXSjY-rK',
       title: 'Premier League Highlights',
       platform: 'youtube', 
       viewers: '950',
@@ -164,7 +164,6 @@ const LiveStreams: React.FC = () => {
           {streams.map((stream) => (
             <motion.div
               key={stream.id}
-              whileHover={{ scale: 1.02 }}
               className="bg-black/30 backdrop-blur-md rounded-2xl border border-yellow-400/20 overflow-hidden transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-yellow-400/40 hover:shadow-[0_12px_40px_rgba(240,185,11,0.1)]"
             >
               {/* Video Player */}
