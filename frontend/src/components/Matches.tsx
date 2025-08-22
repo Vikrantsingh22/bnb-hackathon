@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Clock, Zap, Radio, Play, ExternalLink, Users, Calendar, Bell } from 'lucide-react';
 import { apiService, MatchDay, Match } from '../services/apiService';
 import { useAuth } from '../hooks/useAuth';
+import BettingModal from './BettingModal';
 
 const Matches: React.FC = () => {
   const [liveMatches, setLiveMatches] = useState<MatchDay[]>([]);
@@ -10,6 +11,11 @@ const Matches: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'live' | 'upcoming'>('live');
   const { isConnected } = useAuth();
+  
+  // Betting modal state
+  const [isBettingModalOpen, setIsBettingModalOpen] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [selectedTeam, setSelectedTeam] = useState<'team1' | 'team2' | null>(null);
 
   // Sample stream URLs for matches (in real app, this would come from API)
   const getStreamForMatch = (matchId: string): string | null => {
@@ -73,6 +79,21 @@ const Matches: React.FC = () => {
     e.stopPropagation();
     const calendarLink = generateCalendarLink(match);
     window.open(calendarLink, '_blank', 'width=600,height=600');
+  };
+
+  // Handle opening betting modal
+  const openBettingModal = (match: Match, team: 'team1' | 'team2', e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSelectedMatch(match);
+    setSelectedTeam(team);
+    setIsBettingModalOpen(true);
+  };
+
+  // Handle closing betting modal
+  const closeBettingModal = () => {
+    setIsBettingModalOpen(false);
+    setSelectedMatch(null);
+    setSelectedTeam(null);
   };
 
   useEffect(() => {
@@ -214,27 +235,36 @@ const Matches: React.FC = () => {
               {match.betting && (
                 <div className="border-t border-gray-700 pt-6">
                   <h5 className="text-lg font-rajdhani-semibold text-white mb-4 text-center">Betting Odds</h5>
-                  <div className="flex justify-between items-center mb-4">
-                    <div className="text-center flex-1">
+                  <div className="flex justify-between items-center mb-4 gap-4">
+                    <motion.button
+                      onClick={(e) => openBettingModal(match, 'team1', e)}
+                      className="text-center flex-1 bg-gray-800/50 hover:bg-yellow-400/10 border border-gray-600 hover:border-yellow-400/50 rounded-lg p-3 transition-all duration-200"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
                       <div className="text-sm text-gray-400 mb-2 font-rajdhani-medium">{team1.name}</div>
                       <div className="text-xl font-rajdhani-bold text-yellow-400 [text-shadow:0_0_10px_rgba(240,185,11,0.5)]">
                         {match.betting.team1.odds}
                       </div>
-                    </div>
-                    <div className="text-center flex-1">
+                    </motion.button>
+                    <motion.button
+                      onClick={(e) => openBettingModal(match, 'team2', e)}
+                      className="text-center flex-1 bg-gray-800/50 hover:bg-yellow-400/10 border border-gray-600 hover:border-yellow-400/50 rounded-lg p-3 transition-all duration-200"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
                       <div className="text-sm text-gray-400 mb-2 font-rajdhani-medium">{team2.name}</div>
                       <div className="text-xl font-rajdhani-bold text-yellow-400 [text-shadow:0_0_10px_rgba(240,185,11,0.5)]">
                         {match.betting.team2.odds}
                       </div>
-                    </div>
+                    </motion.button>
                   </div>
                   {isConnected && (
-                    <motion.button
-                      whileTap={{ scale: 0.98 }}
-                      className="w-full bg-gradient-to-r from-yellow-400 to-yellow-300 text-black font-rajdhani-semibold py-3 px-6 rounded-xl border-none cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(240,185,11,0.3)] hover:from-yellow-500 hover:to-yellow-400 text-lg"
-                    >
-                      Place Bet
-                    </motion.button>
+                    <div className="text-center">
+                      <p className="text-gray-400 text-sm font-rajdhani-medium">
+                        Click on team odds to place bet
+                      </p>
+                    </div>
                   )}
                 </div>
               )}
@@ -311,27 +341,36 @@ const Matches: React.FC = () => {
 
         {match.betting && (
           <div className="border-t border-gray-700 pt-4 mt-4">
-            <div className="flex justify-between items-center mb-3">
-              <div className="text-center">
-                <div className="text-xs text-gray-400 mb-1 font-rajdhani-medium">{team1.name} Odds</div>
+            <div className="flex justify-between items-center mb-3 gap-2">
+              <motion.button
+                onClick={(e) => openBettingModal(match, 'team1', e)}
+                className="text-center flex-1 bg-gray-800/50 hover:bg-yellow-400/10 border border-gray-600 hover:border-yellow-400/50 rounded-lg p-2 transition-all duration-200"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="text-xs text-gray-400 mb-1 font-rajdhani-medium">{team1.name}</div>
                 <div className="text-lg font-rajdhani-bold text-yellow-400 [text-shadow:0_0_10px_rgba(240,185,11,0.5)]">
                   {match.betting.team1.odds}
                 </div>
-              </div>
-              <div className="text-center">
-                <div className="text-xs text-gray-400 mb-1 font-rajdhani-medium">{team2.name} Odds</div>
+              </motion.button>
+              <motion.button
+                onClick={(e) => openBettingModal(match, 'team2', e)}
+                className="text-center flex-1 bg-gray-800/50 hover:bg-yellow-400/10 border border-gray-600 hover:border-yellow-400/50 rounded-lg p-2 transition-all duration-200"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="text-xs text-gray-400 mb-1 font-rajdhani-medium">{team2.name}</div>
                 <div className="text-lg font-rajdhani-bold text-yellow-400 [text-shadow:0_0_10px_rgba(240,185,11,0.5)]">
                   {match.betting.team2.odds}
                 </div>
-              </div>
+              </motion.button>
             </div>
             {isConnected && (
-              <motion.button
-                whileTap={{ scale: 0.98 }}
-                className="w-full bg-gradient-to-r from-yellow-400 to-yellow-300 text-black font-rajdhani-semibold py-2.5 px-4 rounded-xl border-none cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(240,185,11,0.3)] hover:from-yellow-500 hover:to-yellow-400"
-              >
-                Place Bet
-              </motion.button>
+              <div className="text-center">
+                <p className="text-gray-400 text-xs font-rajdhani-medium">
+                  Click on team odds to place bet
+                </p>
+              </div>
             )}
           </div>
         )}
@@ -404,6 +443,14 @@ const Matches: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Betting Modal */}
+      <BettingModal
+        isOpen={isBettingModalOpen}
+        onClose={closeBettingModal}
+        match={selectedMatch}
+        selectedTeam={selectedTeam}
+      />
     </motion.section>
   );
 };
