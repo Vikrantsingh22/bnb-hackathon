@@ -2,6 +2,7 @@ import axios from "axios";
 import { Request, Response } from "express";
 import { selectRandomUserAgent } from "../util/common";
 import logger from "../util/winstonLogger";
+import { supabase } from "../app";
 const cheerio = require("cheerio");
 const parseScheduledMatches = async (apiResponse: any) => {
   const $ = cheerio.load(apiResponse);
@@ -31,10 +32,13 @@ const parseScheduledMatches = async (apiResponse: any) => {
         stats?: string | null;
         vods?: string | null;
         event?: string;
+        matchID?: string | null;
       } = { matchUrl: null };
 
       match.matchUrl =
         "https://www.vlr.gg" + $(matchEl).attr("href")?.trim() || null;
+
+      match.matchID = $(matchEl).attr("href")?.trim() || null;
 
       match.time = $(matchEl).find("div.match-item-time").text().trim();
 
@@ -186,14 +190,14 @@ const extractMatchStatistics = async (htmlResponse: any) => {
     isLive: boolean | null;
     team1: {
       name: string | null;
-
+      logo: string | null;
       overallScore: number | null;
       players: any[];
       isWon: boolean;
     };
     team2: {
       name: string | null;
-
+      logo: string | null;
       overallScore: number | null;
       players: any[];
       isWon: boolean;
@@ -205,14 +209,14 @@ const extractMatchStatistics = async (htmlResponse: any) => {
     isLive: null,
     team1: {
       name: null,
-
+      logo: null,
       overallScore: null,
       isWon: false,
       players: [],
     },
     team2: {
       name: null,
-
+      logo: null,
       overallScore: null,
       isWon: false,
       players: [],
@@ -239,6 +243,10 @@ const extractMatchStatistics = async (htmlResponse: any) => {
         .text()
         .trim();
     }
+    matchStats.team1.logo =
+      "https:" + $("a.match-header-link.wf-link-hover.mod-1 img").attr("src");
+    matchStats.team2.logo =
+      "https:" + $("a.match-header-link.wf-link-hover.mod-2 img").attr("src");
 
     let team1Score = 0;
     let team2Score = 0;
@@ -898,4 +906,39 @@ export const scrapeMatchResults = async () => {
   });
 
   return scheduledMatches;
+};
+
+const populateLiveMatches = async () => {
+  const scheduledMatches = await axios.post("/api/vlr/scheduledMatches", {
+    onlyLive: true,
+  });
+
+  for (const matchGroup of scheduledMatches.data) {
+  }
+
+  for (const match of scheduledMatches.data[0].matches) {
+    const matchUrl = match.matchUrl;
+    const { data: existingMatch, error: matchError } = await supabase
+      .from("liveMatches")
+      .select("*")
+      .eq("matchID", matchUrl)
+      .single();
+
+    if (matchError || !existingMatch) {
+      logger.error(`Creating new match with Match ID: ${matchUrl}`);
+      // creating match if does not exists
+
+      const { data: newMatch, error: newMatchError } = await supabase
+        .from("liveMatches")
+        .insert([{ matchID: matchUrl }])
+        .single();
+
+      if (newMatchError || !newMatch) {
+        logger.error(
+          `Error creating match | Match ID: ${matchUrl} | Message: ${newMatchError.message}`
+        );
+        throw new Error("Error creating match");
+      }
+    }
+  }
 };
