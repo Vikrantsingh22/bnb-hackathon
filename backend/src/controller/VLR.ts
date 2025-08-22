@@ -32,13 +32,13 @@ const parseScheduledMatches = async (apiResponse: any) => {
         stats?: string | null;
         vods?: string | null;
         event?: string;
-        matchID?: string | null;
+        matchID?: number | null;
       } = { matchUrl: null };
 
       match.matchUrl =
         "https://www.vlr.gg" + $(matchEl).attr("href")?.trim() || null;
 
-      match.matchID = $(matchEl).attr("href")?.trim() || null;
+      match.matchID = parseInt(extractMatchID($(matchEl).attr("href")?.trim()));
 
       match.time = $(matchEl).find("div.match-item-time").text().trim();
 
@@ -920,7 +920,7 @@ export const populateLiveMatches = async () => {
   });
 
   for (const match of scheduledMatches.data[0].matches) {
-    const matchID = extractMatchID(match.matchUrl);
+    const matchID = match.matchID;
     const { data: existingMatch, error: matchError } = await supabase
       .from("liveMatches")
       .select("*")
@@ -960,7 +960,7 @@ export const settleLiveMatches = async () => {
 
   for (const match of liveMatches) {
     // process each live match
-    const matchID = extractMatchID(match.matchID);
+    const matchID = match.matchID;
     const matchUrl = match.matchUrl;
     let uniqueId;
     if (matchUrl.length && matchUrl.length > 0) {
