@@ -137,7 +137,7 @@ const Matches: React.FC = () => {
       transition={{ delay: 0.4 }}
       className="px-4 sm:px-6 lg:px-8 py-16"
     >
-      <div className="mx-20">
+      <div className="mx-10">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-10">
           <h3 className="text-3xl sm:text-4xl font-bold text-white">Live Matches</h3>
           <div className="flex gap-2 bg-black/30 backdrop-blur-md rounded-2xl p-1.5 border border-yellow-400/20 shadow-[0_8px_32px_rgba(0,0,0,0.3)] self-start sm:self-auto">

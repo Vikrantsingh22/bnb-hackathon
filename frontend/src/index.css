@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
 /* Reset and base styles */
 
 
@@ -12,7 +13,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: 'Rajdhani', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2d2d2d 100%);
   color: #ffffff;
   overflow-x: hidden;
@@ -146,6 +147,32 @@ body {
   50% {
     opacity: 0.5;
   }
+}
+
+/* Font weight utilities for Rajdhani */
+.font-rajdhani-light {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 300;
+}
+
+.font-rajdhani-regular {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 400;
+}
+
+.font-rajdhani-medium {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 500;
+}
+
+.font-rajdhani-semibold {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+}
+
+.font-rajdhani-bold {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
 }
 
 /* Card styles */

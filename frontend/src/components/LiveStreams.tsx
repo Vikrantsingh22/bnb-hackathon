@@ -10,9 +10,9 @@ const LiveStreams: React.FC = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.6 }}
-      className="px-4 sm:px-6 lg:px-8 py-16 bg-black/10"
+      className="px-4 sm:px-6 lg:px-8 py-16"
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-10">
         <h3 className="text-3xl sm:text-4xl font-bold text-white mb-10">Live Streams</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
           {streams.map((stream) => (
