@@ -5,7 +5,6 @@ import {
   retrieveMatchStatistics,
   retrieveScheduledMatches,
   scrapeMatchResults,
-  vlrLiveScore,
 } from "../controller/VLR";
 import {
   validateExctractMatcheStatistics,
@@ -39,10 +38,6 @@ router.post(
   validateExctractMatcheStatistics,
 
   async (req, res) => {
-    if (req.body.isLive === true) {
-      const liveResponse = await vlrLiveScore();
-      return res.json(liveResponse);
-    }
     const response = await retrieveMatchStatistics(req.body.matchUrl);
     res.json(response);
   }

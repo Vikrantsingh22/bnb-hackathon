@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Request, Response } from "express";
 import { selectRandomUserAgent } from "../util/common";
+import logger from "../util/winstonLogger";
 const cheerio = require("cheerio");
 const parseScheduledMatches = async (apiResponse: any) => {
   const $ = cheerio.load(apiResponse);
@@ -134,7 +135,7 @@ export const retrieveScheduledMatches = async (req: Request, res: Response) => {
     const result = await parseScheduledMatches(html);
     res.json(result);
   } catch (error) {
-    console.error("Error fetching scheduled matches:", error);
+    logger.error("Error fetching scheduled matches:", error);
     res.status(500).json({ error: "Failed to retrieve scheduled matches" });
   }
 };
@@ -146,16 +147,27 @@ const extractMatchStatistics = async (htmlResponse: any) => {
     matchUrl: string | null;
     eventName: string | null;
     matchTime: string | null;
+    betting: {
+      team1: {
+        odds: number | null;
+        direction: string | null;
+      };
+      team2: {
+        odds: number | null;
+        direction: string | null;
+      };
+    };
+    isLive: boolean | null;
     team1: {
       name: string | null;
-      score: number | string | null;
+
       overallScore: number | null;
       players: any[];
       isWon: boolean;
     };
     team2: {
       name: string | null;
-      score: number | string | null;
+
       overallScore: number | null;
       players: any[];
       isWon: boolean;
@@ -164,19 +176,30 @@ const extractMatchStatistics = async (htmlResponse: any) => {
     matchUrl: "",
     eventName: null,
     matchTime: null,
+    isLive: null,
     team1: {
       name: null,
-      score: null,
+
       overallScore: null,
       isWon: false,
       players: [],
     },
     team2: {
       name: null,
-      score: null,
+
       overallScore: null,
       isWon: false,
       players: [],
+    },
+    betting: {
+      team1: {
+        odds: null,
+        direction: null,
+      },
+      team2: {
+        odds: null,
+        direction: null,
+      },
     },
   };
 
@@ -190,19 +213,118 @@ const extractMatchStatistics = async (htmlResponse: any) => {
         .text()
         .trim();
     }
-    const team1Score = parseInt(
-      $(item).find("div.match-header-vs-score div span").eq(0).text().trim()
-    );
-    const team2Score = parseInt(
-      $(item).find("div.match-header-vs-score div span").eq(2).text().trim()
-    );
 
-    if (team1Score > team2Score) {
-      matchStats.team1.isWon = true;
-      matchStats.team2.isWon = false;
-    } else if (team1Score < team2Score) {
-      matchStats.team1.isWon = false;
-      matchStats.team2.isWon = true;
+    let team1Score = 0;
+    let team2Score = 0;
+    const matchLiveValidation = $(item)
+      .find("div.match-header-vs-score div span")
+      .eq(0)
+      .text()
+      .trim();
+    if (matchLiveValidation == "live") {
+      matchStats.isLive = true;
+      team1Score = parseInt(
+        $(item)
+          .find("div.match-header-vs-score div.match-header-vs-score span")
+          .eq(0)
+          .text()
+          .trim()
+      );
+      team2Score = parseInt(
+        $(item)
+          .find("div.match-header-vs-score div.match-header-vs-score span")
+          .eq(2)
+          .text()
+          .trim()
+      );
+    } else {
+      matchStats.isLive = false;
+      team1Score = parseInt(
+        $(item).find("div.match-header-vs-score div span").eq(0).text().trim()
+      );
+      team2Score = parseInt(
+        $(item).find("div.match-header-vs-score div span").eq(2).text().trim()
+      );
+    }
+
+    if (matchStats.isLive == false) {
+      if (team1Score > team2Score) {
+        matchStats.team1.isWon = true;
+        matchStats.team2.isWon = false;
+      } else if (team1Score < team2Score) {
+        matchStats.team1.isWon = false;
+        matchStats.team2.isWon = true;
+      }
+    }
+
+    const bettingContainer = $("#wrapper div.col-container div.col.mod-3");
+
+    const secondDiv = bettingContainer.children("div").eq(1);
+
+    const matchBetItem = secondDiv.find("a.wf-card.mod-dark.match-bet-item");
+
+    if (matchBetItem.length > 0) {
+      // Extract team1 odds using your exact path
+      const team1BetHalf = matchBetItem.find("div.match-bet-item-half").eq(0);
+      const team1OddsElement = team1BetHalf
+        .find("div")
+        .eq(1)
+        .find("span.match-bet-item-odds");
+      const team1classAttr = team1OddsElement.attr("class");
+      const classes = team1classAttr ? team1classAttr.split(/\s+/) : [];
+      const team1isUp = classes.includes("mod-up");
+      const team1isDown = classes.includes("mod-down");
+
+      const team1Odds = team1OddsElement.text().trim();
+
+      const team2BetHalf = matchBetItem.find("div.match-bet-item-half").eq(1);
+      const team2OddsElement = team2BetHalf
+        .find("div")
+        .eq(0)
+        .find("span.match-bet-item-odds");
+      const team2classAttr = team2OddsElement.attr("class");
+      const team2classes = team2classAttr ? team2classAttr.split(/\s+/) : [];
+      const team2isUp = team2classes.includes("mod-up");
+      const team2isDown = team2classes.includes("mod-down");
+
+      const team2Odds = team2OddsElement.text().trim();
+
+      if (team1Odds && matchStats.isLive) {
+        matchStats.betting.team1.odds = parseFloat(team1Odds) || null;
+        matchStats.betting.team1.direction = team1isUp
+          ? "Up"
+          : team1isDown
+          ? "Down"
+          : null;
+      }
+
+      if (team2Odds && matchStats.isLive) {
+        matchStats.betting.team2.odds = parseFloat(team2Odds) || null;
+        matchStats.betting.team2.direction = team2isUp
+          ? "Up"
+          : team2isDown
+          ? "Down"
+          : null;
+      }
+    } else {
+      const allBettingElements = $("#wrapper").find("span.match-bet-item-odds");
+
+      if (allBettingElements.length > 0) {
+        allBettingElements.each((index: any, element: any) => {
+          $(element).text().trim();
+        });
+
+        // Extract first two odds if available
+        if (allBettingElements.length >= 1) {
+          const firstOdds = $(allBettingElements[0]).text().trim();
+          matchStats.betting.team1.odds = parseFloat(firstOdds) || null;
+        }
+
+        if (allBettingElements.length >= 2) {
+          const secondOdds = $(allBettingElements[1]).text().trim();
+          matchStats.betting.team2.odds = parseFloat(secondOdds) || null;
+        }
+      }
     }
 
     matchStats.team1.overallScore = team1Score;
@@ -229,11 +351,11 @@ const extractMatchStatistics = async (htmlResponse: any) => {
       const scoreText = team1ScoreElement.text().trim();
 
       const scoreMatch = scoreText.match(/\d+/);
-      matchStats.team1.score = scoreMatch ? parseInt(scoreMatch[0]) : scoreText;
+      // matchStats.team1.score = scoreMatch ? parseInt(scoreMatch[0]) : scoreText;
     }
 
     const team2NameElement = $(
-      "div#wrapper div.col-container div.col.mod-3 div.wf-card.match-header div.match-header-vs a.match-header-link.wf-link-hover.mod-2 div.match-header-link-name.mod-2 div.wf-title-med.mod-single"
+      "div#wrapper div.col-container div.col.mod-3 div.wf-card.match-header div.match-header-vs a.match-header-link.wf-link-hover.mod-2 div.match-header-link-name.mod-2 div.wf-title-med"
     );
     if (team2NameElement.length > 0) {
       matchStats.team2.name = team2NameElement.text().trim();
@@ -245,7 +367,7 @@ const extractMatchStatistics = async (htmlResponse: any) => {
     if (team2ScoreElement.length > 0) {
       const scoreText = team2ScoreElement.text().trim();
       const scoreMatch = scoreText.match(/\d+/);
-      matchStats.team2.score = scoreMatch ? parseInt(scoreMatch[0]) : scoreText;
+      // matchStats.team2.score = scoreMatch ? parseInt(scoreMatch[0]) : scoreText;
     }
 
     try {
@@ -340,10 +462,10 @@ const extractMatchStatistics = async (htmlResponse: any) => {
           });
         });
     } catch (error) {
-      console.error("Error extracting match statistics:", error);
+      logger.error("Error extracting match statistics:", error);
     }
   } catch (error) {
-    console.error("Error extracting match statistics:", error);
+    logger.error("Error extracting match statistics:", error);
     return {
       error: "Failed to extract match statistics",
       details: error,
@@ -380,7 +502,7 @@ export const retrieveMatchStatistics = async (matchUrl: string) => {
     const matchStats = await extractMatchStatistics(response.data);
     return matchStats;
   } catch (error) {
-    console.error("Error retrieving match statistics:", error);
+    logger.error("Error retrieving match statistics:", error);
     return { error: "Failed to retrieve match statistics" };
   }
 };
@@ -561,11 +683,11 @@ export const retrieveExtendedScheduledMatches = async (
   const maxPages = 50; // Safety limit to prevent infinite loops
 
   try {
-    console.log(`Starting to fetch scheduled matches from: ${currentUrl}`);
+    logger.info(`Starting to fetch scheduled matches from: ${currentUrl}`);
 
     while (currentUrl && pageCount < maxPages) {
       pageCount++;
-      console.log(`Fetching page ${pageCount}: ${currentUrl}`);
+      logger.info(`Fetching page ${pageCount}: ${currentUrl}`);
 
       // Fetch current page data
       const html = await fetchPageData(currentUrl);
@@ -595,7 +717,7 @@ export const retrieveExtendedScheduledMatches = async (
 
       // Parse pagination info to get next page URL
       const paginationInfo = parsePaginationInfo(html);
-      console.log(`Page ${pageCount} info:`, {
+      logger.info(`Page ${pageCount} info:`, {
         currentPage: paginationInfo.currentPage,
         hasMorePages: paginationInfo.hasMorePages,
         nextPageUrl: paginationInfo.nextPageUrl,
@@ -610,7 +732,7 @@ export const retrieveExtendedScheduledMatches = async (
       }
     }
 
-    console.log(
+    logger.info(
       `Completed fetching ${pageCount} pages. Total match groups: ${allScheduledMatches.length}`
     );
 
@@ -619,7 +741,7 @@ export const retrieveExtendedScheduledMatches = async (
       (sum, dateGroup) => sum + dateGroup.matches.length,
       0
     );
-    console.log(`Total individual matches retrieved: ${totalMatches}`);
+    logger.info(`Total individual matches retrieved: ${totalMatches}`);
 
     res.json({
       totalPages: pageCount,
@@ -628,7 +750,7 @@ export const retrieveExtendedScheduledMatches = async (
       data: allScheduledMatches,
     });
   } catch (error) {
-    console.error("Error fetching scheduled matches:", error);
+    logger.error("Error fetching scheduled matches:", error);
     res.status(500).json({
       error: "Failed to retrieve scheduled matches",
       pagesProcessed: pageCount,
@@ -756,166 +878,4 @@ const moment = require("moment-timezone");
 
 const headers = {
   "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-};
-export const vlrLiveScore = async (
-  numPages = 1,
-  fromPage: number | null = null,
-  toPage: number | null = null
-) => {
-  const url = "https://www.vlr.gg";
-
-  const headers = {
-    "User-Agent":
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Safari/537.36",
-  };
-
-  const resp = await axios.get(url, { headers });
-  const htmlText = resp.data;
-  const $ = cheerio.load(htmlText);
-  const status = resp.status;
-
-  const matches = $(".js-home-matches-upcoming a.wf-module-item");
-  const result: LiveMatchResult[] = [];
-
-  interface TeamRoundText {
-    ct: string;
-    t: string;
-  }
-
-  interface LiveMatchResult {
-    team1: string;
-    team2: string;
-    flag1: string;
-    flag2: string;
-    team1_logo: string;
-    team2_logo: string;
-    score1: string;
-    score2: string;
-    team1_round_ct: string;
-    team1_round_t: string;
-    team2_round_ct: string;
-    team2_round_t: string;
-    map_number: string;
-    current_map: string;
-    time_until_match: string;
-    match_event: string;
-    match_series: string;
-    unix_timestamp: string;
-    match_page: string;
-  }
-
-  for (let i = 0; i < matches.length; i++) {
-    const matchElem = matches[i];
-    const match = $(matchElem);
-
-    const isLive: boolean = match.find(".h-match-eta.mod-live").length > 0;
-    if (!isLive) continue;
-
-    const teams: string[] = [];
-    const flags: string[] = [];
-    const scores: string[] = [];
-    const roundTexts: TeamRoundText[] = [];
-
-    match.find(".h-match-team").each((j: number, teamElem: cheerio.Element) => {
-      const team = $(teamElem);
-      teams.push(team.find(".h-match-team-name").text().trim());
-
-      const flagClass: string = team.find(".flag").attr("class") || "";
-      flags.push(flagClass.replace(" mod-", "").replace("16", "_"));
-
-      scores.push(team.find(".h-match-team-score").text().trim());
-
-      const roundCT: string =
-        team.find(".h-match-team-rounds .mod-ct").first().text().trim() ||
-        "N/A";
-      const roundT: string =
-        team.find(".h-match-team-rounds .mod-t").first().text().trim() || "N/A";
-      roundTexts.push({ ct: roundCT, t: roundT });
-    });
-
-    const eta: string = "LIVE";
-    const matchEvent: string = match
-      .find(".h-match-preview-event")
-      .text()
-      .trim();
-    const matchSeries: string = match
-      .find(".h-match-preview-series")
-      .text()
-      .trim();
-
-    const utcStr: string | undefined = match
-      .find(".moment-tz-convert")
-      .attr("data-utc-ts");
-
-    // Handle timestamp (numeric unix vs formatted string)
-    let unixTimestamp = "Unknown";
-    if (utcStr) {
-      if (/^\d+$/.test(utcStr)) {
-        // unix timestamp (seconds)
-        unixTimestamp = moment
-          .unix(Number(utcStr))
-          .utc()
-          .format("YYYY-MM-DD HH:mm:ss");
-      } else {
-        // formatted string
-        unixTimestamp = moment
-          .utc(utcStr, "YYYY-MM-DD HH:mm:ss")
-          .format("YYYY-MM-DD HH:mm:ss");
-      }
-    }
-
-    const urlPath: string = "https://www.vlr.gg/" + match.attr("href");
-
-    const matchPageResp = await axios.get(urlPath, { headers });
-    const matchHtml: string = matchPageResp.data;
-    const $$ = cheerio.load(matchHtml);
-
-    const teamLogos: string[] = [];
-    $$(".match-header-vs img").each((k: number, imgElem: cheerio.Element) => {
-      const src: string = $$(imgElem).attr("src") || "";
-      teamLogos.push(src.startsWith("http") ? src : "https:" + src);
-    });
-
-    let currentMap: string = "Unknown";
-    let mapNumber: string = "Unknown";
-    const currentMapElem = $$(
-      ".vm-stats-gamesnav-item.js-map-switch.mod-active.mod-live"
-    ).first();
-    if (currentMapElem.length) {
-      let mapText: string = currentMapElem.text().trim().replace(/\n|\t/g, "");
-      const mapNumberMatch = mapText.match(/^\d+/);
-      mapNumber = mapNumberMatch ? mapNumberMatch[0] : "Unknown";
-      currentMap = mapText.replace(/^\d+/, "") || "Unknown";
-    }
-
-    const liveMatch: LiveMatchResult = {
-      team1: teams[0],
-      team2: teams[1],
-      flag1: flags[0],
-      flag2: flags[1],
-      team1_logo: teamLogos[0] || "",
-      team2_logo: teamLogos[1] || "",
-      score1: scores[0],
-      score2: scores[1],
-      team1_round_ct: roundTexts[0]?.ct || "N/A",
-      team1_round_t: roundTexts[0]?.t || "N/A",
-      team2_round_ct: roundTexts[1]?.ct || "N/A",
-      team2_round_t: roundTexts[1]?.t || "N/A",
-      map_number: mapNumber,
-      current_map: currentMap,
-      time_until_match: eta,
-      match_event: matchEvent,
-      match_series: matchSeries,
-      unix_timestamp: unixTimestamp,
-      match_page: urlPath,
-    };
-
-    result.push(liveMatch);
-  }
-
-  if (status !== 200) {
-    throw new Error(`API response: ${status}`);
-  }
-
-  return { data: { status, segments: result } };
 };
