@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, Zap, Radio, Play, ExternalLink, Users } from 'lucide-react';
+import { Clock, Zap, Radio, Play, ExternalLink, Users, Calendar, Bell } from 'lucide-react';
 import { apiService, MatchDay, Match } from '../services/apiService';
 import { useAuth } from '../hooks/useAuth';
 
@@ -32,6 +32,47 @@ const Matches: React.FC = () => {
   // Get YouTube embed URL
   const getYouTubeEmbedUrl = (videoId: string): string => {
     return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&controls=0&modestbranding=1&rel=0&showinfo=0`;
+  };
+
+  // Generate Google Calendar link for upcoming matches
+  const generateCalendarLink = (match: Match): string => {
+    const team1 = typeof match.team1 === 'string' ? { name: match.team1 } : match.team1;
+    const team2 = typeof match.team2 === 'string' ? { name: match.team2 } : match.team2;
+    
+    // Event details
+    const title = `${team1.name} vs ${team2.name}`;
+    const description = `${match.event} match between ${team1.name} and ${team2.name}. ${match.betting ? `Betting odds - ${team1.name}: ${match.betting.team1.odds}, ${team2.name}: ${match.betting.team2.odds}` : ''}`;
+    
+    // Parse the match time and date to create proper datetime
+    // For demo purposes, we'll use a future date. In real app, this would come from API
+    const eventDate = new Date();
+    eventDate.setDate(eventDate.getDate() + Math.floor(Math.random() * 7) + 1); // Random date 1-7 days from now
+    const [hours, minutes] = match.time.split(':');
+    eventDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    
+    // Format dates for Google Calendar (YYYYMMDDTHHMMSSZ format)
+    const startDate = eventDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    const endDate = new Date(eventDate.getTime() + 2 * 60 * 60 * 1000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'; // 2 hours duration
+    
+    // Construct Google Calendar URL
+    const calendarParams = new URLSearchParams({
+      action: 'TEMPLATE',
+      text: title,
+      dates: `${startDate}/${endDate}`,
+      details: description,
+      location: match.event || 'Online Stream',
+      sf: 'true',
+      output: 'xml'
+    });
+    
+    return `https://calendar.google.com/calendar/render?${calendarParams.toString()}`;
+  };
+
+  // Handle adding to calendar
+  const addToCalendar = (match: Match, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const calendarLink = generateCalendarLink(match);
+    window.open(calendarLink, '_blank', 'width=600,height=600');
   };
 
   useEffect(() => {
@@ -213,9 +254,22 @@ const Matches: React.FC = () => {
         className="bg-black/30 backdrop-blur-md rounded-2xl border border-yellow-400/20 p-6 transition-all duration-300 cursor-pointer shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-yellow-400/40 hover:shadow-[0_12px_40px_rgba(240,185,11,0.1)] w-full max-w-sm mx-auto"
       >
         <div className="flex justify-between items-start mb-4">
-          <div className="flex items-center gap-1 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-rajdhani-semibold">
-            <Clock size={12} />
-            <span>{match.eta}</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-rajdhani-semibold">
+              <Clock size={12} />
+              <span>{match.eta}</span>
+            </div>
+            {/* Calendar Notification Button */}
+            <motion.button
+              onClick={(e) => addToCalendar(match, e)}
+              className="flex items-center gap-1 bg-yellow-400/20 text-yellow-400 px-2 py-1 rounded-full text-xs font-rajdhani-semibold border border-yellow-400/30 hover:bg-yellow-400/30 hover:border-yellow-400/50 transition-all duration-200"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              title="Add to Google Calendar"
+            >
+              <Calendar size={12} />
+              <span>Notify</span>
+            </motion.button>
           </div>
           <div className="text-right text-sm text-gray-400">
             <div className="font-rajdhani-medium">{match.time}</div>
