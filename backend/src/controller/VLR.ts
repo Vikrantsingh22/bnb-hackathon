@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { selectRandomUserAgent } from "../util/common";
 import logger from "../util/winstonLogger";
 import { supabase } from "../app";
+import { match } from "assert";
 const cheerio = require("cheerio");
 const parseScheduledMatches = async (apiResponse: any) => {
   const $ = cheerio.load(apiResponse);
@@ -143,6 +144,12 @@ export const retrieveScheduledMatches = async (req: Request, res: Response) => {
         let matchesBetsResponse;
         for (const match of result[0].matches) {
           matchesBetsResponse = await retrieveMatchStatistics(match.matchUrl);
+          if ("matchLiveLink" in matchesBetsResponse) {
+            match.matchLiveLink = matchesBetsResponse.matchLiveLink ?? null;
+          } else {
+            match.matchLiveLink = null;
+          }
+
           if ("betting" in matchesBetsResponse) {
             match.betting = matchesBetsResponse.betting ?? null;
             match.team1 = matchesBetsResponse.team1 ?? null;
@@ -176,6 +183,7 @@ const extractMatchStatistics = async (htmlResponse: any) => {
   const matchStats: {
     matchUrl: string | null;
     eventName: string | null;
+    matchLiveLink: string | null;
     matchTime: string | null;
     betting: {
       team1: {
@@ -205,6 +213,7 @@ const extractMatchStatistics = async (htmlResponse: any) => {
   } = {
     matchUrl: "",
     eventName: null,
+    matchLiveLink: null,
     matchTime: null,
     isLive: null,
     team1: {
@@ -247,6 +256,10 @@ const extractMatchStatistics = async (htmlResponse: any) => {
       "https:" + $("a.match-header-link.wf-link-hover.mod-1 img").attr("src");
     matchStats.team2.logo =
       "https:" + $("a.match-header-link.wf-link-hover.mod-2 img").attr("src");
+
+    matchStats.matchLiveLink = $(
+      "div#wrapper div.col-container div.col.mod-3 div.match-streams-bets-container div.match-streams div.match-streams-container div.wf-card.mod-dark.noselect.match-streams-btn.mod-embed a.match-streams-btn-external"
+    ).attr("href");
 
     let team1Score = 0;
     let team2Score = 0;
