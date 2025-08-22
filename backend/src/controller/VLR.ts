@@ -908,13 +908,10 @@ export const scrapeMatchResults = async () => {
   return scheduledMatches;
 };
 
-const populateLiveMatches = async () => {
+export const populateLiveMatches = async () => {
   const scheduledMatches = await axios.post("/api/vlr/scheduledMatches", {
     onlyLive: true,
   });
-
-  for (const matchGroup of scheduledMatches.data) {
-  }
 
   for (const match of scheduledMatches.data[0].matches) {
     const matchUrl = match.matchUrl;
@@ -938,6 +935,42 @@ const populateLiveMatches = async () => {
           `Error creating match | Match ID: ${matchUrl} | Message: ${newMatchError.message}`
         );
         throw new Error("Error creating match");
+      }
+    }
+  }
+};
+
+export const settleLiveMatches = async () => {
+  // select the matches from supabase liveMatches where isLive is true
+  const { data: liveMatches, error: liveMatchesError } = await supabase
+    .from("liveMatches")
+    .select("*")
+    .eq("isLive", true);
+
+  if (liveMatchesError) {
+    logger.error(`No matches are currently live: ${liveMatchesError.message}`);
+    return;
+  }
+
+  for (const match of liveMatches) {
+    // process each live match
+    const matchUrl = `https://www.vlr.gg` + match.matchID;
+    const matchStats = await retrieveMatchStatistics(matchUrl);
+    if ("isLive" in matchStats && matchStats.isLive === true) {
+      continue;
+    } else if ("isLive" in matchStats && matchStats.isLive === false) {
+      const team1WinningStatus = matchStats.team1.isWon;
+      const team2WinningStatus = matchStats.team2.isWon;
+      const winningTeam = team1WinningStatus ? "team1" : "team2";
+      const { error: updateError } = await supabase
+        .from("liveMatches")
+        .update({ isLive: false, teamWon: winningTeam })
+        .eq("matchID", match.matchID);
+
+      if (updateError) {
+        logger.error(
+          `Error updating match | Match ID: ${match.matchID} | Message: ${updateError.message}`
+        );
       }
     }
   }
