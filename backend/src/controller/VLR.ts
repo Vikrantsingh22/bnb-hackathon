@@ -132,7 +132,25 @@ export const retrieveScheduledMatches = async (req: Request, res: Response) => {
       },
     });
     const html = response.data;
-    const result = await parseScheduledMatches(html);
+    let result = await parseScheduledMatches(html);
+    if (req.body?.onlyLive === true) {
+      result = getLiveMatchesByDate(result);
+      if (result.length > 0 && result[0].matches.length > 0) {
+        let matchesBetsResponse;
+        for (const match of result[0].matches) {
+          matchesBetsResponse = await retrieveMatchStatistics(match.matchUrl);
+          if ("betting" in matchesBetsResponse) {
+            match.betting = matchesBetsResponse.betting ?? null;
+            match.team1 = matchesBetsResponse.team1 ?? null;
+            match.team2 = matchesBetsResponse.team2 ?? null;
+          } else {
+            match.betting = null;
+            match.team1 = null;
+            match.team2 = null;
+          }
+        }
+      }
+    }
     res.json(result);
   } catch (error) {
     logger.error("Error fetching scheduled matches:", error);
@@ -140,6 +158,14 @@ export const retrieveScheduledMatches = async (req: Request, res: Response) => {
   }
 };
 
+function getLiveMatchesByDate(matchesData: any) {
+  return matchesData
+    .map((dateObj: any) => ({
+      date: dateObj.date,
+      matches: dateObj.matches.filter((match: any) => match.status === "LIVE"),
+    }))
+    .filter((dateObj: any) => dateObj.matches.length > 0); // Only return dates that have live matches
+}
 const extractMatchStatistics = async (htmlResponse: any) => {
   const $ = cheerio.load(htmlResponse);
 
