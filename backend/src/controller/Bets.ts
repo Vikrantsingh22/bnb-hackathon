@@ -9,7 +9,7 @@ type VLRBetsPayload = {
   wallet_address: string;
 };
 
-const vlrMakeBets = async (vlrBetsPayload: VLRBetsPayload) => {
+export const vlrMakeBets = async (vlrBetsPayload: VLRBetsPayload) => {
   // Implement your betting logic here
   const { matchId, team, odds, amount, transaction_hash, wallet_address } =
     vlrBetsPayload;

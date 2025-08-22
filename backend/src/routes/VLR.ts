@@ -10,6 +10,8 @@ import {
   validateExctractMatcheStatistics,
   validateFetchScheduledMatches,
 } from "../middleware/VLR";
+import { vlrMakeBets } from "../controller/Bets";
+import { next } from "cheerio/dist/commonjs/api/traversing";
 const router = express.Router();
 router.post(
   "/scheduledMatches",
@@ -68,6 +70,22 @@ router.post(
   },
   async (req, res) => {
     const response = await scrapeMatchResults();
+    res.json(response);
+  }
+);
+
+router.post(
+  "/makeBets",
+  (req, res, next) => {
+    logger.info(
+      `Request received | URL: ${req.url} | Method: ${req.method} | IP: ${
+        req.ip
+      } | Headers: ${JSON.stringify(req.headers)}`
+    );
+    next();
+  },
+  async (req, res) => {
+    const response = await vlrMakeBets(req.body);
     res.json(response);
   }
 );
