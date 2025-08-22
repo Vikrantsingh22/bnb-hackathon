@@ -899,9 +899,3 @@ export const scrapeMatchResults = async () => {
 
   return scheduledMatches;
 };
-
-const moment = require("moment-timezone");
-
-const headers = {
-  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-};

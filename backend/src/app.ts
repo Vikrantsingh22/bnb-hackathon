@@ -3,6 +3,9 @@ import { config } from "dotenv";
 import logger from "./util/winstonLogger";
 import vlrRouter from "./routes/VLR";
 import cors from "cors";
+import { createClient } from "@supabase/supabase-js";
+
+// Load from environment variables
 
 config();
 
@@ -29,6 +32,16 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   );
   res.status(500).json({ message: "An error occurred on the server." });
 });
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // Use service role key for server-side
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error(
+    "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variable"
+  );
+}
+
+export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Start server and log the event
 app.listen(port, () => {
