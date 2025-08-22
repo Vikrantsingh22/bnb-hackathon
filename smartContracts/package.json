@@ -1,0 +1,14 @@
+{
+  "name": "multi-token-escrow",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "npx hardhat test",
+    "deploy:testnet": "npx hardhat run scripts/deploy.js --network bscTestnet",
+    "deploy:mainnet": "npx hardhat run scripts/deploy.js --network bscMainnet"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "dotenv": "^16.3.1",
+    "hardhat": "^2.20.1"
+  }
+}
