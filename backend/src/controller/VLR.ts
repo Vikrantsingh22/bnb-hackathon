@@ -908,31 +908,37 @@ export const scrapeMatchResults = async () => {
   return scheduledMatches;
 };
 
+function extractMatchID(input: any) {
+  const regex = /\/(\d+)\//;
+  const match = input.match(regex);
+  return match ? match[1] : null;
+}
+
 export const populateLiveMatches = async () => {
   const scheduledMatches = await axios.post("/api/vlr/scheduledMatches", {
     onlyLive: true,
   });
 
   for (const match of scheduledMatches.data[0].matches) {
-    const matchUrl = match.matchUrl;
+    const matchID = extractMatchID(match.matchUrl);
     const { data: existingMatch, error: matchError } = await supabase
       .from("liveMatches")
       .select("*")
-      .eq("matchID", matchUrl)
+      .eq("matchID", matchID)
       .single();
 
     if (matchError || !existingMatch) {
-      logger.error(`Creating new match with Match ID: ${matchUrl}`);
+      logger.error(`Creating new match with Match ID: ${matchID}`);
       // creating match if does not exists
 
       const { data: newMatch, error: newMatchError } = await supabase
         .from("liveMatches")
-        .insert([{ matchID: matchUrl }])
+        .insert([{ matchID: matchID, matchUrl: match.matchUrl }])
         .single();
 
       if (newMatchError || !newMatch) {
         logger.error(
-          `Error creating match | Match ID: ${matchUrl} | Message: ${newMatchError.message}`
+          `Error creating match | Match ID: ${matchID} | Message: ${newMatchError.message}`
         );
         throw new Error("Error creating match");
       }
@@ -954,14 +960,21 @@ export const settleLiveMatches = async () => {
 
   for (const match of liveMatches) {
     // process each live match
-    const matchUrl = `https://www.vlr.gg` + match.matchID;
-    const matchStats = await retrieveMatchStatistics(matchUrl);
+    const matchID = extractMatchID(match.matchID);
+    const matchUrl = match.matchUrl;
+    let uniqueId;
+    if (matchUrl.length && matchUrl.length > 0) {
+      uniqueId = "https://www.vlr.gg" + matchUrl;
+    } else {
+      uniqueId = `https://www.vlr.gg/${matchID}/`;
+    }
+    const matchStats = await retrieveMatchStatistics(uniqueId);
     if ("isLive" in matchStats && matchStats.isLive === true) {
       continue;
     } else if ("isLive" in matchStats && matchStats.isLive === false) {
       const team1WinningStatus = matchStats.team1.isWon;
       const team2WinningStatus = matchStats.team2.isWon;
-      const winningTeam = team1WinningStatus ? "team1" : "team2";
+      const winningTeam = team1WinningStatus ? 1 : 2;
       const { error: updateError } = await supabase
         .from("liveMatches")
         .update({ isLive: false, teamWon: winningTeam })
