@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+httpx
+opencv-python
+ultralytics
+yt-dlp
+streamlink
+ffmpeg-python
+python-multipart

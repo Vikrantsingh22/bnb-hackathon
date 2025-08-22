@@ -1,0 +1,62 @@
+# OS junk
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.pyo
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+wheels/
+pip-wheel-metadata/
+*.manifest
+*.spec
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Tool caches / test artifacts
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.tox/
+.cache/
+.coverage*
+htmlcov/
+
+# Editors/IDE
+.vscode/
+.idea/
+
+# Ultralytics / training outputs
+runs/
+
+# Model weights: ignore all, keep your trained one
+# *.pt
+# !models/scoreboard.pt   # track your detector
+# (optional) still ignore the base yolov8 weights if present
+# yolov8n.pt
+
+# Datasets (large): images & labels stay out of git
+# yolo/**/images/
+# yolo/**/labels/
+# yolo/scorebaord-datasets/
+# !yolo/data/
+# !yolo/data/scoreboard.yaml
+
+# Temp / logs
+tmp/
+temp/
+*.tmp
+*.log
