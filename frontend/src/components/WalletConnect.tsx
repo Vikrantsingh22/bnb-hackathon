@@ -42,7 +42,7 @@ const WalletConnect: React.FC = () => {
               {formatAddress(wallet.address)}
             </div>
             <div className="text-gray-400 text-xs">
-              {formatBalance(wallet.balance)} ETH
+              {formatBalance(wallet.balance)} {wallet.chainId === 97 ? 'tBNB' : 'ETH'}
             </div>
           </div>
         </div>

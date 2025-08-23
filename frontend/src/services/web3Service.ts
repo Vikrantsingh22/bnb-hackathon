@@ -1,4 +1,6 @@
 import { ethers } from 'ethers';
+import { CONTRACT_CONFIG } from '../config/contract';
+import { bettingService } from './bettingService';
 
 declare global {
   interface Window {
@@ -29,6 +31,17 @@ class Web3Service {
 
       if (accounts.length === 0) {
         throw new Error('No accounts found');
+      }
+
+      // Initialize betting service wallet client
+      await bettingService.initializeWallet();
+
+      // Try to switch to BSC testnet
+      try {
+        await bettingService.switchToBSCTestnet();
+      } catch (networkError) {
+        console.warn('Could not switch to BSC testnet:', networkError);
+        // Continue with current network for now
       }
 
       this.provider = new ethers.BrowserProvider(window.ethereum);
@@ -91,6 +104,31 @@ class Web3Service {
 
   getSigner(): ethers.JsonRpcSigner | null {
     return this.signer;
+  }
+
+  async isOnCorrectNetwork(): Promise<boolean> {
+    try {
+      if (!window.ethereum) return false;
+      
+      const chainId = await window.ethereum.request({
+        method: 'eth_chainId',
+      });
+      
+      const currentChainId = parseInt(chainId, 16);
+      return currentChainId === CONTRACT_CONFIG.chainId;
+    } catch (error) {
+      console.error('Error checking network:', error);
+      return false;
+    }
+  }
+
+  async switchToCorrectNetwork(): Promise<void> {
+    try {
+      await bettingService.switchToBSCTestnet();
+    } catch (error) {
+      console.error('Error switching network:', error);
+      throw error;
+    }
   }
 }
 
