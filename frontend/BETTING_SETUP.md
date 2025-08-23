@@ -6,9 +6,9 @@ This guide explains how to set up and use the end-to-end MetaMask betting functi
 
 ## Smart Contract Details
 
-- **Contract Address**: `0x77076fe32766ca211aae5a3db175d17b81ab451f`
+- **Contract Address**: `0x37f2d4e46621f4ec2382496cf12bd326bbe58b1c`
 - **Network**: BSC Testnet (Chain ID: 97)
-- **Block Explorer**: https://testnet.bscscan.com/address/0x77076fe32766ca211aae5a3db175d17b81ab451f
+- **Block Explorer**: https://testnet.bscscan.com/address/0x37f2d4e46621f4ec2382496cf12bd326bbe58b1c
 
 ## Prerequisites
 

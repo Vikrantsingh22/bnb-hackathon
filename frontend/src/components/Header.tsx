@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { GamepadIcon } from 'lucide-react';
+
 import WalletConnect from './WalletConnect';
 
 const Header: React.FC = () => {
