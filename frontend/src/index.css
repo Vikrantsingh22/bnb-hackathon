@@ -1,0 +1,201 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap');
+/* Reset and base styles */
+
+
+/* Ensure no conflicting styles */
+.grid {
+  display: grid !important;
+}
+
+.flex {
+  display: flex !important;
+}
+
+body {
+  font-family: 'Rajdhani', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2d2d2d 100%);
+  color: #ffffff;
+  overflow-x: hidden;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(26, 26, 26, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #f0b90b, #ffd700);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #e6a800, #ffed4e);
+}
+
+/* Button styles */
+.btn-primary {
+  background: linear-gradient(135deg, #f0b90b, #ffd700);
+  border: none;
+  color: #000000;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(240, 185, 11, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(240, 185, 11, 0.4);
+  background: linear-gradient(135deg, #e6a800, #ffed4e);
+}
+
+.btn-primary:active {
+  transform: translateY(0px);
+}
+
+/* Utility classes */
+.text-glow {
+  text-shadow: 0 0 10px rgba(240, 185, 11, 0.5);
+}
+
+.card-glow {
+  box-shadow: 0 0 20px rgba(240, 185, 11, 0.1);
+}
+
+.card-glow:hover {
+  box-shadow: 0 0 30px rgba(240, 185, 11, 0.2);
+}
+
+/* Glassmorphism utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(240, 185, 11, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.glass-gold {
+  background: rgba(240, 185, 11, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(240, 185, 11, 0.3);
+  box-shadow: 0 8px 32px rgba(240, 185, 11, 0.1);
+}
+
+/* Animation classes */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(6, 182, 212, 0.6);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Font weight utilities for Rajdhani */
+.font-rajdhani-light {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 300;
+}
+
+.font-rajdhani-regular {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 400;
+}
+
+.font-rajdhani-medium {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 500;
+}
+
+.font-rajdhani-semibold {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+}
+
+.font-rajdhani-bold {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+}
+
+/* Card styles */
+.card {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(240, 185, 11, 0.2);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.card:hover {
+  border-color: rgba(240, 185, 11, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(240, 185, 11, 0.1);
+}
+
+/* Fredoka Font Classes */
+.font-fredoka-light { font-family: 'Fredoka', sans-serif; font-weight: 300; }
+.font-fredoka-regular { font-family: 'Fredoka', sans-serif; font-weight: 400; }
+.font-fredoka-medium { font-family: 'Fredoka', sans-serif; font-weight: 500; }
+.font-fredoka-semibold { font-family: 'Fredoka', sans-serif; font-weight: 600; }
+.font-fredoka-bold { font-family: 'Fredoka', sans-serif; font-weight: 700; }
