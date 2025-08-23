@@ -942,7 +942,7 @@ export const populateLiveMatches = async () => {
       headers,
     }
   );
-  console.log("Scheduled Matches:", scheduledMatches.data);
+  console.log("Scheduled Matches:", JSON.stringify(scheduledMatches.data));
 
   if (scheduledMatches.data && scheduledMatches.data.length > 0) {
     for (const match of scheduledMatches.data[0].matches) {
@@ -952,22 +952,29 @@ export const populateLiveMatches = async () => {
         .select("*")
         .eq("matchID", matchID)
         .single();
+      console.log("Checking match ID:", matchError);
 
       if (matchError || !existingMatch) {
         logger.error(`Creating new match with Match ID: ${matchID}`);
         // creating match if does not exists
 
-        const { data: newMatch, error: newMatchError } = await supabase
-          .from("liveMatches")
-          .insert([{ matchID: matchID, matchUrl: match.matchUrl }])
-          .single();
-
-        if (newMatchError || !newMatch) {
-          logger.error(
-            `Error creating match | Match ID: ${matchID} | Message: ${newMatchError}`
-          );
-          throw new Error("Error creating match");
+        try {
+          const { data: newMatch, error: newMatchError } = await supabase
+            .from("liveMatches")
+            .insert([{ matchID: matchID, matchUrl: match.matchUrl }])
+            .single();
+          console.log("New Match Insert Data:", newMatch);
+          console.log("New Match Insert Result:", newMatchError);
+        } catch (error) {
+          console.log("Error creating match:", error);
         }
+
+        // if (newMatchError || !newMatch) {
+        //   logger.error(
+        //     `Error creating match | Match ID: ${matchID} | Message: ${newMatchError}`
+        //   );
+        //   throw new Error("Error creating match");
+        // }
       }
     }
   } else {
@@ -1004,14 +1011,20 @@ export const settleLiveMatches = async () => {
       const team1WinningStatus = matchStats.team1.isWon;
       const team2WinningStatus = matchStats.team2.isWon;
       const winningTeam = team1WinningStatus ? 1 : 2;
-      const { error: updateError } = await supabase
-        .from("liveMatches")
-        .update({ isLive: false, teamWon: winningTeam })
-        .eq("matchID", match.matchID);
-
-      if (updateError) {
+      try {
+        const { data: updateData, error: updateError } = await supabase
+          .from("liveMatches")
+          .update({ isLive: false, teamWon: winningTeam })
+          .eq("matchID", match.matchID);
+        if (updateError) {
+          logger.error(
+            `Error updating match | Match ID: ${match.matchID} | Message: ${updateError}`
+          );
+        }
+        logger.info(`Match updated successfully | Match ID: ${match.matchID}`);
+      } catch (error) {
         logger.error(
-          `Error updating match | Match ID: ${match.matchID} | Message: ${updateError}`
+          `Error updating match | Match ID: ${match.matchID} | Message: ${error}`
         );
       }
     }
