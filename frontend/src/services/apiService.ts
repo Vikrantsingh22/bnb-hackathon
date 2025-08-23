@@ -1,8 +1,7 @@
 import axios from 'axios';
 
 const API_BASE_URL = 'http://13.203.213.218:3000';
-const API_KEY = 'env'; // You should move this to environment variables
-
+const API_KEY = 'env'; 
 export interface Team {
   name: string;
   logo?: string;

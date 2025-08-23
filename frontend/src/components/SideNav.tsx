@@ -26,7 +26,7 @@ const SideNav: React.FC<SideNavProps> = ({ isExpanded, setIsExpanded }) => {
     { icon: CreditCard, label: 'All Challenges', href: '#challenges', active: false },
     { icon: BarChart3, label: 'Streams', href: '#streams', active: false },
     { icon: TrendingUp, label: 'Leaderboard', href: '#leaderboard', active: false },
-    { icon: HelpCircle, label: 'How It Works', href: '#how-it-works', active: false },
+    { icon: HelpCircle, label: 'Onramp', href: '#on-ramp', active: false },
   ];
 
   const accountItems = [
