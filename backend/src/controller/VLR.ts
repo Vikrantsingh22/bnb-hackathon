@@ -947,14 +947,22 @@ export const populateLiveMatches = async () => {
   if (scheduledMatches.data && scheduledMatches.data.length > 0) {
     for (const match of scheduledMatches.data[0].matches) {
       const matchID = match.matchID;
-      const { data: existingMatch, error: matchError } = await supabase
+      const { data: existingMatches, error: matchError } = await supabase
         .from("liveMatches")
         .select("*")
-        .eq("matchID", matchID)
-        .single();
-      console.log("Checking match ID:", matchError);
+        .eq("matchID", matchID);
 
-      if (matchError || !existingMatch) {
+      console.log("Checking match ID - Error:", matchError);
+      console.log("Existing matches found:", existingMatches?.length || 0);
+
+      if (matchError) {
+        logger.error(
+          `Error checking match ID ${matchID}: ${matchError.message}`
+        );
+        continue; // Skip this match if there's a database error
+      }
+
+      if (!existingMatches || existingMatches.length === 0) {
         logger.error(`Creating new match with Match ID: ${matchID}`);
         // creating match if does not exists
 
@@ -962,10 +970,21 @@ export const populateLiveMatches = async () => {
           const { data: newMatch, error: newMatchError } = await supabase
             .from("liveMatches")
             .insert([{ matchID: matchID, matchUrl: match.matchUrl }])
-            .single();
-          console.log("New Match Insert Data:", newMatch);
-          console.log("New Match Insert Result:", newMatchError);
+            .select();
+
+          if (newMatchError) {
+            logger.error(
+              `Error creating match | Match ID: ${matchID} | Error: ${newMatchError.message}`
+            );
+            console.log("New Match Insert Error:", newMatchError);
+          } else {
+            logger.info(`Successfully created match with ID: ${matchID}`);
+            console.log("New Match Insert Data:", newMatch);
+          }
         } catch (error) {
+          logger.error(
+            `Exception creating match | Match ID: ${matchID} | Error: ${error}`
+          );
           console.log("Error creating match:", error);
         }
 

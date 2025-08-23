@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@supabase/supabase-js": "^2.56.0",
+    "@types/node-cron": "^3.0.11",
     "axios": "^1.11.0",
     "cheerio": "^1.0.0",
     "cors": "^2.8.5",
@@ -19,6 +20,7 @@
     "express": "^5.1.0",
     "https-proxy-agent": "^7.0.6",
     "moment-timezone": "^0.6.0",
+    "node-cron": "^4.2.1",
     "winston": "^3.17.0"
   },
   "devDependencies": {
