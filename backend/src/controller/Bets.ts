@@ -33,7 +33,7 @@ export const vlrMakeBets = async (vlrBetsPayload: VLRBetsPayload) => {
 
     if (newMatchError || !newMatch) {
       logger.error(
-        `Error creating match | Match ID: ${matchId} | Message: ${newMatchError.message}`
+        `Error creating match | Match ID: ${matchId} | Message: ${newMatchError}`
       );
       throw new Error("Error creating match");
     }
@@ -51,7 +51,7 @@ export const vlrMakeBets = async (vlrBetsPayload: VLRBetsPayload) => {
   ]);
 
   if (error) {
-    logger.error(`Error making bet | Message: ${error.message}`);
+    logger.error(`Error making bet | Message: ${error}`);
     throw new Error("Error making bet");
   }
 

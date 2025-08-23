@@ -964,7 +964,7 @@ export const populateLiveMatches = async () => {
 
         if (newMatchError || !newMatch) {
           logger.error(
-            `Error creating match | Match ID: ${matchID} | Message: ${newMatchError.message}`
+            `Error creating match | Match ID: ${matchID} | Message: ${newMatchError}`
           );
           throw new Error("Error creating match");
         }
@@ -983,7 +983,7 @@ export const settleLiveMatches = async () => {
     .eq("isLive", true);
 
   if (liveMatchesError) {
-    logger.error(`No matches are currently live: ${liveMatchesError.message}`);
+    logger.error(`No matches are currently live: ${liveMatchesError}`);
     return;
   }
 
@@ -1011,7 +1011,7 @@ export const settleLiveMatches = async () => {
 
       if (updateError) {
         logger.error(
-          `Error updating match | Match ID: ${match.matchID} | Message: ${updateError.message}`
+          `Error updating match | Match ID: ${match.matchID} | Message: ${updateError}`
         );
       }
     }
