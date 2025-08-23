@@ -114,16 +114,6 @@ class BettingService {
     // Ensure we're on the correct network
     await this.switchToBSCTestnet();
 
-    // Create contract instance
-    const contract = getContract({
-      address: CONTRACT_CONFIG.address,
-      abi: CONTRACT_ABI,
-      client: {
-        public: this.publicClient,
-        wallet: this.walletClient,
-      },
-    });
-
     try {
       // Convert odds to the format expected by the contract (multiplied by 100)
       const contractOdds = Math.round(betParams.odds * 100);
@@ -158,7 +148,11 @@ class BettingService {
       });
 
       // Execute the transaction
-      const hash = await contract.write.participate(txParams.args, {
+      const hash = await this.walletClient.writeContract({
+        address: CONTRACT_CONFIG.address,
+        abi: CONTRACT_ABI,
+        functionName: 'participate',
+        args: txParams.args,
         account: account[0],
         value: txParams.value,
       });

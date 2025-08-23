@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, Zap, Radio, Play, ExternalLink, Users, Calendar, Bell } from 'lucide-react';
+import { Clock, Zap, Radio, Play, ExternalLink, Users, Calendar } from 'lucide-react';
 import { apiService, MatchDay, Match } from '../services/apiService';
 import { useAuth } from '../hooks/useAuth';
 import BettingModal from './BettingModal';
