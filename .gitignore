@@ -35,7 +35,7 @@ build/
 
 # TypeScript
 *.tsbuildinfo
-*.d.ts
+
 
 # Optional: if using a test framework
 coverage/
