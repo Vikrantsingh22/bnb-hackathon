@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://bnb-hackathon.catoff.xyz";
+const API_BASE_URL = "https://bnb-hackathon.catoff.xyz/api";
 const API_KEY = "key1";
 export interface Team {
   name: string;
