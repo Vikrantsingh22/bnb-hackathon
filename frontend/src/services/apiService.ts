@@ -32,6 +32,7 @@ export interface Match {
   stats: string;
   vods: string;
   event: string;
+  matchLiveLink?: string;
   betting?: BettingOdds;
 }
 

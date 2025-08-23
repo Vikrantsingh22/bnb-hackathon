@@ -17,15 +17,19 @@ const Matches: React.FC = () => {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<'team1' | 'team2' | null>(null);
 
-  // Sample stream URLs for matches (in real app, this would come from API)
-  const getStreamForMatch = (matchId: string): string | null => {
-    const streamMap: { [key: string]: string } = {
-      // Add some sample streams for demo
-      'match1': 'https://www.youtube.com/live/BF08zVbQP-c?si=Q4nUr90m7qeLhAiG',
-      'match2': 'https://youtu.be/lffsANNTIgc?si=2dm-Yxsen3mA3ssF',
-      'match3': 'https://youtu.be/34_X1K_LsyU?si=_V_ciL0VEG8bNNzN'
-    };
-    return streamMap[matchId] || 'https://www.youtube.com/live/BF08zVbQP-c?si=Q4nUr90m7qeLhAiG'; // Default live stream
+  // Get stream URL from match data
+  const getStreamForMatch = (match: Match): string | null => {
+    return match.matchLiveLink || null;
+  };
+
+  // Detect stream platform (Twitch or YouTube)
+  const detectStreamPlatform = (url: string): 'twitch' | 'youtube' | 'unknown' => {
+    if (url.includes('twitch.tv')) {
+      return 'twitch';
+    } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      return 'youtube';
+    }
+    return 'unknown';
   };
 
   // Extract YouTube video ID from URL
@@ -38,6 +42,14 @@ const Matches: React.FC = () => {
   // Get YouTube embed URL
   const getYouTubeEmbedUrl = (videoId: string): string => {
     return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&controls=0&modestbranding=1&rel=0&showinfo=0`;
+  };
+
+  // Get Twitch embed URL
+  const getTwitchEmbedUrl = (twitchUrl: string): string => {
+    // Extract channel name from Twitch URL
+    const channelMatch = twitchUrl.match(/twitch\.tv\/([^/?]+)/);
+    const channel = channelMatch ? channelMatch[1] : 'valorantesports_cn';
+    return `https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}&autoplay=true&muted=true`;
   };
 
   // Generate Google Calendar link for upcoming matches
@@ -122,8 +134,9 @@ const Matches: React.FC = () => {
   const renderMatch = (match: Match, index: number) => {
     const team1 = typeof match.team1 === 'string' ? { name: match.team1 } : match.team1;
     const team2 = typeof match.team2 === 'string' ? { name: match.team2 } : match.team2;
-    const streamUrl = getStreamForMatch(match.matchID);
-    const videoId = streamUrl ? getYouTubeVideoId(streamUrl) : null;
+    const streamUrl = getStreamForMatch(match);
+    const streamPlatform = streamUrl ? detectStreamPlatform(streamUrl) : 'unknown';
+    const videoId = streamUrl && streamPlatform === 'youtube' ? getYouTubeVideoId(streamUrl) : null;
     const isLive = match.status === 'LIVE';
     
     // Render large card with stream for LIVE matches
@@ -139,16 +152,27 @@ const Matches: React.FC = () => {
           <div className="flex flex-col lg:flex-row h-full min-h-[400px]">
             {/* Stream Section - Left Side */}
             <div className="lg:w-1/2 relative">
-              {videoId ? (
+              {streamUrl && streamPlatform !== 'unknown' ? (
                 <div className="relative h-64 lg:h-full bg-black">
-                  <iframe
-                    src={getYouTubeEmbedUrl(videoId)}
-                    className="w-full h-full"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                    title={`${team1.name} vs ${team2.name}`}
-                  />
+                  {streamPlatform === 'youtube' && videoId ? (
+                    <iframe
+                      src={getYouTubeEmbedUrl(videoId)}
+                      className="w-full h-full"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      title={`${team1.name} vs ${team2.name}`}
+                    />
+                  ) : streamPlatform === 'twitch' ? (
+                    <iframe
+                      src={getTwitchEmbedUrl(streamUrl)}
+                      className="w-full h-full"
+                      frameBorder="0"
+                      allow="autoplay; fullscreen"
+                      allowFullScreen
+                      title={`${team1.name} vs ${team2.name}`}
+                    />
+                  ) : null}
                   
                   {/* Stream Overlay */}
                   <div className="absolute inset-0 pointer-events-none">
@@ -156,6 +180,11 @@ const Matches: React.FC = () => {
                     <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-rajdhani-semibold shadow-lg flex items-center gap-1">
                       <Radio size={12} />
                       <span>LIVE</span>
+                    </div>
+                    
+                    {/* Platform Badge */}
+                    <div className="absolute top-4 left-20 bg-purple-600 text-white px-2 py-1 rounded text-xs font-rajdhani-semibold shadow-lg">
+                      {streamPlatform.toUpperCase()}
                     </div>
                     
                     {/* Viewers Count */}
