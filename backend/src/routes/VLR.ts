@@ -1,10 +1,12 @@
 import express from "express";
 import logger from "../util/winstonLogger";
 import {
+  populateLiveMatches,
   retrieveExtendedScheduledMatches,
   retrieveMatchStatistics,
   retrieveScheduledMatches,
   scrapeMatchResults,
+  settleLiveMatches,
 } from "../controller/VLR";
 import {
   validateExctractMatcheStatistics,
@@ -86,6 +88,42 @@ router.post(
   },
   async (req, res) => {
     const response = await vlrMakeBets(req.body);
+    res.json(response);
+  }
+);
+
+// populateLiveMatches
+
+router.post(
+  "/populateLiveMatches",
+  (req, res, next) => {
+    logger.info(
+      `Request received | URL: ${req.url} | Method: ${req.method} | IP: ${
+        req.ip
+      } | Headers: ${JSON.stringify(req.headers)}`
+    );
+    next();
+  },
+  async (req, res) => {
+    const response = await populateLiveMatches();
+    res.json(response);
+  }
+);
+
+// settleLiveMatches
+
+router.post(
+  "/settleLiveMatches",
+  (req, res, next) => {
+    logger.info(
+      `Request received | URL: ${req.url} | Method: ${req.method} | IP: ${
+        req.ip
+      } | Headers: ${JSON.stringify(req.headers)}`
+    );
+    next();
+  },
+  async (req, res) => {
+    const response = await settleLiveMatches();
     res.json(response);
   }
 );

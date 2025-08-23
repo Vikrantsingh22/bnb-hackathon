@@ -928,34 +928,50 @@ function extractMatchID(input: any) {
 }
 
 export const populateLiveMatches = async () => {
-  const scheduledMatches = await axios.post("/api/vlr/scheduledMatches", {
-    onlyLive: true,
-  });
+  console.log("Populating live matches...");
+  const headers = {
+    "x-api-key": "key1",
+    "Content-Type": "application/json",
+  };
+  const scheduledMatches = await axios.post(
+    "http://localhost:3000/api/vlr/scheduledMatches",
+    {
+      onlyLive: true,
+    },
+    {
+      headers,
+    }
+  );
+  console.log("Scheduled Matches:", scheduledMatches.data);
 
-  for (const match of scheduledMatches.data[0].matches) {
-    const matchID = match.matchID;
-    const { data: existingMatch, error: matchError } = await supabase
-      .from("liveMatches")
-      .select("*")
-      .eq("matchID", matchID)
-      .single();
-
-    if (matchError || !existingMatch) {
-      logger.error(`Creating new match with Match ID: ${matchID}`);
-      // creating match if does not exists
-
-      const { data: newMatch, error: newMatchError } = await supabase
+  if (scheduledMatches.data && scheduledMatches.data.length > 0) {
+    for (const match of scheduledMatches.data[0].matches) {
+      const matchID = match.matchID;
+      const { data: existingMatch, error: matchError } = await supabase
         .from("liveMatches")
-        .insert([{ matchID: matchID, matchUrl: match.matchUrl }])
+        .select("*")
+        .eq("matchID", matchID)
         .single();
 
-      if (newMatchError || !newMatch) {
-        logger.error(
-          `Error creating match | Match ID: ${matchID} | Message: ${newMatchError.message}`
-        );
-        throw new Error("Error creating match");
+      if (matchError || !existingMatch) {
+        logger.error(`Creating new match with Match ID: ${matchID}`);
+        // creating match if does not exists
+
+        const { data: newMatch, error: newMatchError } = await supabase
+          .from("liveMatches")
+          .insert([{ matchID: matchID, matchUrl: match.matchUrl }])
+          .single();
+
+        if (newMatchError || !newMatch) {
+          logger.error(
+            `Error creating match | Match ID: ${matchID} | Message: ${newMatchError.message}`
+          );
+          throw new Error("Error creating match");
+        }
       }
     }
+  } else {
+    return [];
   }
 };
 
