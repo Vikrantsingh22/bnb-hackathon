@@ -1,7 +1,7 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE_URL = 'http://13.203.213.218:3000';
-const API_KEY = 'env'; 
+const API_BASE_URL = "http://13.203.213.218:3000";
+const API_KEY = "key1";
 export interface Team {
   name: string;
   logo?: string;
@@ -47,20 +47,20 @@ class ApiService {
     this.axiosInstance = axios.create({
       baseURL: API_BASE_URL,
       headers: {
-        'x-api-key': API_KEY,
-        'Content-Type': 'application/json',
+        "x-api-key": API_KEY,
+        "Content-Type": "application/json",
       },
     });
   }
 
   async getScheduledMatches(onlyLive: boolean = false): Promise<MatchDay[]> {
     try {
-      const response = await this.axiosInstance.post('/vlr/scheduledMatches', {
+      const response = await this.axiosInstance.post("/vlr/scheduledMatches", {
         onlyLive,
       });
       return response.data;
     } catch (error) {
-      console.error('Error fetching scheduled matches:', error);
+      console.error("Error fetching scheduled matches:", error);
       throw error;
     }
   }
