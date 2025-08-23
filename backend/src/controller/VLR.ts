@@ -4,6 +4,7 @@ import { selectRandomUserAgent } from "../util/common";
 import logger from "../util/winstonLogger";
 import { supabase } from "../app";
 import { match } from "assert";
+import { settleOnChain, checkGasBalance } from "../util/web3.helper";
 const cheerio = require("cheerio");
 const parseScheduledMatches = async (apiResponse: any) => {
   const $ = cheerio.load(apiResponse);
@@ -1002,6 +1003,13 @@ export const populateLiveMatches = async () => {
 };
 
 export const settleLiveMatches = async () => {
+  // Check if wallet has sufficient gas before starting
+  const hasGas = await checkGasBalance();
+  if (!hasGas) {
+    logger.error("Insufficient gas balance for on-chain settlements");
+    return;
+  }
+
   // select the matches from supabase liveMatches where isLive is true
   const { data: liveMatches, error: liveMatchesError } = await supabase
     .from("liveMatches")
@@ -1013,39 +1021,198 @@ export const settleLiveMatches = async () => {
     return;
   }
 
+  if (!liveMatches || liveMatches.length === 0) {
+    logger.info("No live matches found to settle");
+    return;
+  }
+
+  logger.info(`Found ${liveMatches.length} live matches to process`);
+
   for (const match of liveMatches) {
     // process each live match
     const matchID = match.matchID;
     const matchUrl = match.matchUrl;
     let uniqueId;
-    if (matchUrl.length && matchUrl.length > 0) {
+
+    if (matchUrl && matchUrl.length > 0) {
       uniqueId = "https://www.vlr.gg" + matchUrl;
     } else {
       uniqueId = `https://www.vlr.gg/${matchID}/`;
     }
-    const matchStats = await retrieveMatchStatistics(uniqueId);
-    if ("isLive" in matchStats && matchStats.isLive === true) {
-      continue;
-    } else if ("isLive" in matchStats && matchStats.isLive === false) {
-      const team1WinningStatus = matchStats.team1.isWon;
-      const team2WinningStatus = matchStats.team2.isWon;
-      const winningTeam = team1WinningStatus ? 1 : 2;
-      try {
-        const { data: updateData, error: updateError } = await supabase
-          .from("liveMatches")
-          .update({ isLive: false, teamWon: winningTeam })
-          .eq("matchID", match.matchID);
-        if (updateError) {
+
+    try {
+      const matchStats = await retrieveMatchStatistics(uniqueId);
+
+      if ("isLive" in matchStats && matchStats.isLive === true) {
+        logger.info(`Match ${matchID} is still live, skipping settlement`);
+        continue;
+      } else if ("isLive" in matchStats && matchStats.isLive === false) {
+        const team1WinningStatus = matchStats.team1.isWon;
+        const team2WinningStatus = matchStats.team2.isWon;
+        const winningTeam = team1WinningStatus ? 1 : 2;
+
+        logger.info(`Match ${matchID} finished. Winner: Team ${winningTeam}`);
+
+        try {
+          // Update database first
+          const { data: updateData, error: updateError } = await supabase
+            .from("liveMatches")
+            .update({ isLive: false, teamWon: winningTeam })
+            .eq("matchID", match.matchID);
+
+          if (updateError) {
+            logger.error(
+              `Error updating match in database | Match ID: ${match.matchID} | Message: ${updateError}`
+            );
+            continue; // Skip on-chain settlement if database update fails
+          }
+
+          logger.info(
+            `Match updated successfully in database | Match ID: ${match.matchID}`
+          );
+
+          // Now perform on-chain settlement for winning team
+          try {
+            logger.info(
+              `Starting on-chain settlement for Match ID: ${matchID}, Winner: Team ${winningTeam}`
+            );
+
+            const settlementResult = await settleOnChain(matchID, winningTeam);
+
+            if (settlementResult.success) {
+              if (settlementResult.txHash === "NO_BETS_TO_SETTLE") {
+                logger.info(
+                  `No bets to settle on-chain for Match ID: ${matchID}, Team ${winningTeam}`
+                );
+              } else {
+                logger.info(
+                  `On-chain settlement successful for Match ID: ${matchID}, Team ${winningTeam}. Tx Hash: ${settlementResult.txHash}`
+                );
+
+                // Update database with settlement transaction hash
+                const { error: txUpdateError } = await supabase
+                  .from("liveMatches")
+                  .update({ settlementTxHash: settlementResult.txHash })
+                  .eq("matchID", match.matchID);
+
+                if (txUpdateError) {
+                  logger.warn(
+                    `Failed to update settlement tx hash in database: ${txUpdateError.message}`
+                  );
+                }
+              }
+            } else {
+              logger.error(
+                `On-chain settlement failed for Match ID: ${matchID}, Team ${winningTeam}. Error: ${settlementResult.error}`
+              );
+
+              // Update database to mark settlement as failed
+              const { error: failUpdateError } = await supabase
+                .from("liveMatches")
+                .update({
+                  settlementStatus: "failed",
+                  settlementError: settlementResult.error,
+                })
+                .eq("matchID", match.matchID);
+
+              if (failUpdateError) {
+                logger.warn(
+                  `Failed to update settlement failure status in database: ${failUpdateError.message}`
+                );
+              }
+            }
+          } catch (onChainError) {
+            logger.error(
+              `Exception during on-chain settlement for Match ID: ${matchID}: ${onChainError}`
+            );
+
+            // Update database to mark settlement as failed
+            const { error: failUpdateError } = await supabase
+              .from("liveMatches")
+              .update({
+                settlementStatus: "failed",
+                settlementError: String(onChainError),
+              })
+              .eq("matchID", match.matchID);
+
+            if (failUpdateError) {
+              logger.warn(
+                `Failed to update settlement failure status in database: ${failUpdateError.message}`
+              );
+            }
+          }
+        } catch (error) {
           logger.error(
-            `Error updating match | Match ID: ${match.matchID} | Message: ${updateError}`
+            `Error updating match | Match ID: ${match.matchID} | Message: ${error}`
           );
         }
-        logger.info(`Match updated successfully | Match ID: ${match.matchID}`);
-      } catch (error) {
-        logger.error(
-          `Error updating match | Match ID: ${match.matchID} | Message: ${error}`
-        );
       }
+    } catch (statsError) {
+      logger.error(
+        `Error retrieving match statistics for Match ID: ${matchID}: ${statsError}`
+      );
     }
+  }
+};
+
+/**
+ * Manual settlement endpoint for testing and administrative purposes
+ */
+export const manualSettleMatch = async (req: Request, res: Response) => {
+  const { challengeId, playerId } = req.body;
+
+  if (!challengeId || !playerId) {
+    return res.status(400).json({
+      error: "Missing required parameters: challengeId and playerId",
+    });
+  }
+
+  try {
+    // Check gas balance
+    const hasGas = await checkGasBalance();
+    if (!hasGas) {
+      return res.status(400).json({
+        error: "Insufficient gas balance for on-chain settlement",
+      });
+    }
+
+    logger.info(
+      `Manual settlement requested for challengeId: ${challengeId}, playerId: ${playerId}`
+    );
+
+    const settlementResult = await settleOnChain(challengeId, playerId);
+
+    if (settlementResult.success) {
+      logger.info(
+        `Manual settlement successful for challengeId: ${challengeId}, playerId: ${playerId}`
+      );
+
+      res.json({
+        success: true,
+        txHash: settlementResult.txHash,
+        message:
+          settlementResult.txHash === "NO_BETS_TO_SETTLE"
+            ? "No bets found to settle"
+            : "Settlement completed successfully",
+      });
+    } else {
+      logger.error(
+        `Manual settlement failed for challengeId: ${challengeId}, playerId: ${playerId}: ${settlementResult.error}`
+      );
+
+      res.status(500).json({
+        success: false,
+        error: settlementResult.error,
+      });
+    }
+  } catch (error) {
+    logger.error(
+      `Manual settlement exception for challengeId: ${challengeId}, playerId: ${playerId}: ${error}`
+    );
+
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 };

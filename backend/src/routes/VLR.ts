@@ -7,6 +7,7 @@ import {
   retrieveScheduledMatches,
   scrapeMatchResults,
   settleLiveMatches,
+  manualSettleMatch,
 } from "../controller/VLR";
 import {
   validateExctractMatcheStatistics,
@@ -126,6 +127,21 @@ router.post(
     const response = await settleLiveMatches();
     res.json(response);
   }
+);
+
+// manualSettleMatch - for testing and administrative purposes
+
+router.post(
+  "/manualSettleMatch",
+  (req, res, next) => {
+    logger.info(
+      `Request received | URL: ${req.url} | Method: ${req.method} | IP: ${
+        req.ip
+      } | Headers: ${JSON.stringify(req.headers)}`
+    );
+    next();
+  },
+  manualSettleMatch
 );
 
 export default router;
