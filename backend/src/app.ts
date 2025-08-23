@@ -4,6 +4,8 @@ import logger from "./util/winstonLogger";
 import vlrRouter from "./routes/VLR";
 import cors from "cors";
 import { createClient } from "@supabase/supabase-js";
+import * as cron from "node-cron";
+import { populateLiveMatches, settleLiveMatches } from "./controller/VLR";
 
 // Load from environment variables
 
@@ -49,6 +51,31 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Schedule cron jobs
+// populateLiveMatches every 30 seconds
+cron.schedule("*/30 * * * * *", async () => {
+  try {
+    logger.info("Running populateLiveMatches cron job");
+    await populateLiveMatches();
+    logger.info("populateLiveMatches cron job completed successfully");
+  } catch (error) {
+    logger.error(`Error in populateLiveMatches cron job: ${error}`);
+  }
+});
+
+// settleLiveMatches every 2 minutes
+cron.schedule("*/2 * * * *", async () => {
+  try {
+    logger.info("Running settleLiveMatches cron job");
+    await settleLiveMatches();
+    logger.info("settleLiveMatches cron job completed successfully");
+  } catch (error) {
+    logger.error(`Error in settleLiveMatches cron job: ${error}`);
+  }
+});
+
+logger.info("Cron jobs scheduled successfully");
 
 // Start server and log the event
 app.listen(port, () => {
