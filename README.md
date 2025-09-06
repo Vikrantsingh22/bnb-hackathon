@@ -147,11 +147,11 @@ npm run dev
 
 ## 👥 Team
 
-* **Vikrant Singh** – Backend, Smart Contracts, Integration
-* **Aryaman Raj** – Frontend (React.js)
-* **Sweta Karar** – UI/UX
-* **Tejasvi Kumar** – Data scraping + odds logic
-* **Soumik Baksi** – Testing & coordination
+* **Vikrant Singh** – Backend, Data scraping + odds logic
+* **Aryaman Raj** – Integrations
+* **Sweta Karar** – UI/UX & Frontend (React.js)
+* **Tejasvi Kumar** – Smart Contracts
+* **Soumik Baksi** – AI Vision
 
 ---
 
