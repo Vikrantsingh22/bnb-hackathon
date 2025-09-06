@@ -84,21 +84,85 @@ A minimal escrow contract on **BNB Testnet** that:
 
 ```
 BNBBrawl/
-├── backend/              # Express.js APIs
-│   ├── routes/           # API endpoints (matches, bets, payouts)
-│   ├── services/         # upcoming matches scraper, odds calculator
-│   ├── cron/             # Job schedulers
-│   └── db/               # Supabase queries
-│
-├── frontend/             # React.js (Vite) frontend
-│   ├── src/
-│   │   ├── components/   # UI components (MatchCard, BetForm)
-│   │   ├── pages/        # Upcoming, Live Matches, Bet History
-│   │   └── hooks/        # Wallet, API hooks
-│
-└── contracts/            # Solidity smart contracts
-    ├── BetEscrow.sol
-    └── scripts/          # Deployment scripts
+├── backend
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── src
+│   │   ├── app.ts
+│   │   ├── controller
+│   │   │   ├── Bets.ts
+│   │   │   ├── VLR.ts
+│   │   │   └── sample.html
+│   │   ├── middleware
+│   │   │   └── VLR.ts
+│   │   ├── routes
+│   │   │   └── VLR.ts
+│   │   └── util
+│   │       ├── common.ts
+│   │       ├── proxies.helper.ts
+│   │       ├── responseMaker.helper.ts
+│   │       ├── web3.helper.ts
+│   │       └── winstonLogger.ts
+│   └── tsconfig.json
+├── fifa-ai
+│   ├── main.py
+│   ├── requirements.txt
+│   └── yolov8n.pt
+├── frontend
+│   ├── BETTING_SETUP.md
+│   ├── README.md
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── public
+│   │   ├── logo.png
+│   │   └── vite.svg
+│   ├── src
+│   │   ├── App.css
+│   │   ├── App.tsx
+│   │   ├── assets
+│   │   │   └── react.svg
+│   │   ├── components
+│   │   │   ├── BettingModal.tsx
+│   │   │   ├── Header.tsx
+│   │   │   ├── Hero.tsx
+│   │   │   ├── LiveStreams.tsx
+│   │   │   ├── Matches.tsx
+│   │   │   ├── SideNav.tsx
+│   │   │   └── WalletConnect.tsx
+│   │   ├── config
+│   │   │   └── contract.ts
+│   │   ├── hooks
+│   │   │   └── useAuth.ts
+│   │   ├── index.css
+│   │   ├── main.tsx
+│   │   ├── pages
+│   │   │   └── Home.tsx
+│   │   ├── services
+│   │   │   ├── apiService.ts
+│   │   │   ├── bettingService.ts
+│   │   │   └── web3Service.ts
+│   │   ├── utils
+│   │   │   └── testBetting.ts
+│   │   └── vite-env.d.ts
+│   ├── tsconfig.app.json
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   └── vite.config.ts
+└── smartContracts
+    ├── README.md
+    ├── artifacts
+    │   ├── abi.json
+    │   └── bytecode.txt
+    ├── contracts
+    │   └── MultiTokenEscrow.sol
+    ├── hardhat.config.js
+    ├── package.json
+    ├── scripts
+    │   └── deploy.js
+    └── test
+        └── MultiTokenEscrow.test.js
 ```
 
 ---
@@ -123,10 +187,14 @@ npm run dev
 Configure `.env` file with:
 
 ```
-SUPABASE_URL=...
-SUPABASE_KEY=...
-BNB_RPC_URL=https://data-seed-prebsc-1-s1.binance.org:8545/
+X_API_KEYS=your-api-key
+SUPABASE_URL = ...
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-key
 PRIVATE_KEY=your_wallet_private_key
+BSC_TESTNET_RPC=https://data-seed-prebsc-1-s1.binance.org:8545/
+BSC_MAINNET_RPC=https://bsc-dataseed.binance.org/
+BSCSCAN_API_KEY=
+ESCROW_ADDRESS=.....
 ```
 
 ### Frontend Setup
